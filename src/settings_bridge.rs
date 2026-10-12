@@ -39,6 +39,7 @@ pub mod qobject {
         #[qproperty(QString, font_family, READ, NOTIFY)]
         #[qproperty(i32, font_size, READ, NOTIFY)]
         #[qproperty(f64, opacity, READ, NOTIFY)]
+        #[qproperty(QString, window_color, READ, NOTIFY)]
         #[qproperty(i32, font_size_min, READ, CONSTANT)]
         #[qproperty(i32, font_size_max, READ, CONSTANT)]
         #[qproperty(f64, opacity_min, READ, CONSTANT)]
@@ -99,6 +100,7 @@ pub struct AppSettingsRust {
     font_family: QString,
     font_size: i32,
     opacity: f64,
+    window_color: QString,
     font_size_min: i32,
     font_size_max: i32,
     opacity_min: f64,
@@ -123,6 +125,7 @@ impl Default for AppSettingsRust {
             font_family: QString::default(),
             font_size: 0,
             opacity: 0.0,
+            window_color: QString::default(),
             font_size_min: i32::try_from(settings::FONT_SIZE_MIN).unwrap_or(0),
             font_size_max: i32::try_from(settings::FONT_SIZE_MAX).unwrap_or(i32::MAX),
             opacity_min: settings::OPACITY_MIN,
@@ -144,6 +147,7 @@ impl AppSettingsRust {
         self.font_family = QString::from(&next.font_family);
         self.font_size = i32::try_from(next.font_size).unwrap_or(i32::MAX);
         self.opacity = next.opacity;
+        self.window_color = QString::from(&self.palette.window_color(next.opacity));
         self.settings = next;
     }
 }
@@ -232,6 +236,9 @@ impl qobject::AppSettings {
         }
         if before.opacity.to_bits() != next.opacity.to_bits() {
             self.as_mut().opacity_changed();
+        }
+        if before.theme != next.theme || before.opacity.to_bits() != next.opacity.to_bits() {
+            self.as_mut().window_color_changed();
         }
     }
 }

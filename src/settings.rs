@@ -222,6 +222,34 @@ impl Palette {
             ("cyan", &self.cyan),
         ]
     }
+
+    /// Window background at `opacity` as QML `#AARRGGBB`, premultiplied:
+    /// Qt Quick hands the window color to the compositor as premultiplied
+    /// alpha, so straight RGB adds light instead of letting the desktop show
+    /// through (a light theme turns solid white). NaN counts as opaque.
+    pub fn window_color(&self, opacity: f64) -> String {
+        let opacity = if opacity.is_nan() {
+            1.0
+        } else {
+            opacity.clamp(0.0, 1.0)
+        };
+        // In 0..=255 after the clamp, so the casts cannot truncate.
+        let alpha = (opacity * 255.0).round() as u8;
+        let channel = |i: usize| {
+            let straight = self
+                .bg
+                .get(i..i + 2)
+                .and_then(|hex| u8::from_str_radix(hex, 16).ok())
+                .unwrap_or(0);
+            (f64::from(straight) * f64::from(alpha) / 255.0).round() as u8
+        };
+        format!(
+            "#{alpha:02x}{:02x}{:02x}{:02x}",
+            channel(1),
+            channel(3),
+            channel(5)
+        )
+    }
 }
 
 fn is_hex_color(value: &str) -> bool {

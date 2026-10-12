@@ -182,6 +182,54 @@ fn missing_or_invalid_colors_fall_back_per_key() {
 }
 
 #[test]
+fn opaque_window_color_is_the_theme_background() {
+    let palette = Palette::from_colors_toml(LATTE).unwrap();
+    assert_eq!(palette.window_color(1.0), "#ffeff1f5");
+}
+
+#[test]
+fn translucent_window_color_is_premultiplied() {
+    // Regression: Qt Quick clears the window with a premultiplied color, so a
+    // straight `Qt.rgba(bg, opacity)` on a light theme (#fafafa) saturated to
+    // white at 50% and the opacity slider seemed to do nothing.
+    let palette = Palette::from_colors_toml("background = \"#fafafa\"\n").unwrap();
+    assert_eq!(palette.window_color(0.5), "#807d7d7d");
+    assert_eq!(Palette::builtin().window_color(0.5), "#800d0e13");
+}
+
+#[test]
+fn window_color_channels_never_exceed_alpha() {
+    let palette = Palette::from_colors_toml("background = \"#ffffff\"\n").unwrap();
+    for step in 50..=100 {
+        let color = palette.window_color(f64::from(step) / 100.0);
+        let byte = |i: usize| u8::from_str_radix(&color[i..i + 2], 16).unwrap();
+        let alpha = byte(1);
+        assert!(
+            [3, 5, 7].iter().all(|&i| byte(i) <= alpha),
+            "{color} at {step}%"
+        );
+    }
+}
+
+#[test]
+fn window_color_treats_bad_opacity_as_opaque() {
+    let palette = Palette::builtin();
+    assert_eq!(palette.window_color(f64::NAN), "#ff1a1b26");
+    assert_eq!(palette.window_color(7.0), "#ff1a1b26");
+    assert_eq!(palette.window_color(-1.0), "#00000000");
+}
+
+#[test]
+fn main_qml_paints_the_window_with_the_premultiplied_color() {
+    let qml = include_str!("../../qml/Main.qml");
+    assert!(qml.contains("color: appSettings.window_color"));
+    assert!(
+        !qml.contains("appSettings.opacity)"),
+        "straight-alpha window color is back"
+    );
+}
+
+#[test]
 fn unparsable_colors_toml_is_an_error() {
     assert!(Palette::from_colors_toml("accent = ").is_err());
 }

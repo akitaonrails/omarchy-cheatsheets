@@ -31,7 +31,9 @@ ApplicationWindow {
     function px(n) { return Math.round(n * k) }
 
     // Slight translucency (configurable) lets Hyprland's blur bleed through.
-    color: Qt.rgba(bg.r, bg.g, bg.b, appSettings.opacity)
+    // Premultiplied in Rust (Palette::window_color): Qt.rgba here would wash
+    // the window out toward white instead of making it see-through.
+    color: appSettings.window_color
 
     visible: true
     width: 980

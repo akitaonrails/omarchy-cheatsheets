@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an opacity slider, all in the app's palette. Changes apply live and are
   saved to `settings.toml`; the footer shows where. `Ctrl+=` / `Ctrl+-` /
   `Ctrl+0` change the font size; the whole layout scales with it.
+  The window color is premultiplied, so lowering the opacity shows the
+  desktop through on light themes too instead of washing out to white.
 
 ### Changed
 
