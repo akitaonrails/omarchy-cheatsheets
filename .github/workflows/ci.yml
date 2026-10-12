@@ -44,12 +44,17 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # Ubuntu's Qt6 mkspecs inject -fuse-ld=gold into the link line; gold drops
+    # cxx-qt's whole-archive initializer symbols (Arch's bfd accepts them).
+    # Appending -fuse-ld=lld (last flag wins) sidesteps it.
+    env:
+      RUSTFLAGS: "-D warnings -C link-arg=-fuse-ld=lld"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Qt6 and build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt6-base-dev qt6-declarative-dev libclang-dev cmake
+          sudo apt-get install -y qt6-base-dev qt6-declarative-dev libclang-dev cmake lld
       - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
           toolchain: "1.95"
