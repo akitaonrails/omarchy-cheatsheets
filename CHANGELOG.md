@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - tmux sheet shows both configured prefixes (`Ctrl+Space / Ctrl+b`).
+- Internal: prefix/leader resolution moved from `load.rs` to `resolve.rs`;
+  the tmux/herdr rewrite-and-drop logic now has direct unit tests.
 
 ## [0.1.0] - 2026-10-12
 

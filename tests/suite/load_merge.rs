@@ -1,6 +1,7 @@
 //! Overlay merge behavior: embedded sheets must stay intact, user TOML on top.
 
 use omarchy_cheatsheets::load::{self, LoadError};
+use omarchy_cheatsheets::resolve;
 use omarchy_cheatsheets::search;
 
 #[test]
@@ -51,7 +52,7 @@ fn tmux_prefix_resolves_from_user_conf() {
     .unwrap();
 
     let mut sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
-    load::apply_dynamic_prefixes(&mut sheets, tmp.path());
+    resolve::apply_dynamic_prefixes(&mut sheets, tmp.path());
     let tmux = sheets.iter().find(|s| s.name == "tmux").unwrap();
     assert_eq!(tmux.display_title(), "tmux (prefix: Ctrl+Space / Ctrl+b)");
 }
@@ -68,7 +69,7 @@ fn herdr_prefix_resolves_from_config_toml() {
     .unwrap();
 
     let mut sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
-    load::apply_dynamic_prefixes(&mut sheets, tmp.path());
+    resolve::apply_dynamic_prefixes(&mut sheets, tmp.path());
     let herdr = sheets.iter().find(|s| s.name == "herdr").unwrap();
     assert_eq!(herdr.display_title(), "Herdr (prefix: Ctrl+b)");
 }
@@ -77,7 +78,7 @@ fn herdr_prefix_resolves_from_config_toml() {
 fn unresolved_prefix_strips_template() {
     let tmp = tempfile::tempdir().unwrap();
     let mut sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
-    load::apply_dynamic_prefixes(&mut sheets, tmp.path());
+    resolve::apply_dynamic_prefixes(&mut sheets, tmp.path());
     let tmux = sheets.iter().find(|s| s.name == "tmux").unwrap();
     assert_eq!(tmux.display_title(), "tmux");
 }
@@ -90,7 +91,7 @@ fn nvim_leader_defaults_to_space_with_lazyvim_config() {
     std::fs::write(lua_dir.join("options.lua"), "vim.opt.number = true\n").unwrap();
 
     let mut sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
-    load::apply_dynamic_prefixes(&mut sheets, tmp.path());
+    resolve::apply_dynamic_prefixes(&mut sheets, tmp.path());
     let nvim = sheets.iter().find(|s| s.name == "nvim").unwrap();
     assert_eq!(nvim.display_title(), "Neovim (LazyVim, leader: Space)");
 }
@@ -103,7 +104,7 @@ fn nvim_leader_override_detected() {
     std::fs::write(lua_dir.join("options.lua"), "vim.g.mapleader = \",\"\n").unwrap();
 
     let mut sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
-    load::apply_dynamic_prefixes(&mut sheets, tmp.path());
+    resolve::apply_dynamic_prefixes(&mut sheets, tmp.path());
     let nvim = sheets.iter().find(|s| s.name == "nvim").unwrap();
     assert_eq!(nvim.display_title(), "Neovim (LazyVim, leader: ,)");
 }

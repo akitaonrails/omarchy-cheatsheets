@@ -44,6 +44,12 @@ pub fn display_chord(chord: &str) -> Vec<String> {
             "right" => "→".into(),
             "up" => "↑".into(),
             "down" => "↓".into(),
+            "enter" | "return" => "Enter".into(),
+            "space" => "Space".into(),
+            "tab" => "Tab".into(),
+            "esc" | "escape" => "Esc".into(),
+            "backspace" | "bspace" => "Backspace".into(),
+            "delete" => "Delete".into(),
             _ => part.to_string(),
         })
         .collect()
@@ -284,4 +290,243 @@ fn apply_herdr(sheet: &mut Sheet, actions: &HashMap<String, Vec<String>>) {
         });
     }
     sheet.sections.retain(|s| !s.entries.is_empty());
+}
+
+// --- prefix / leader resolution ------------------------------------------
+
+/// Substitute `{prefix}` in sheet titles with the key resolved from the
+/// user's actual config files. Sheets whose tool has no discoverable
+/// prefix fall back to their static title (template stripped).
+pub fn apply_dynamic_prefixes(sheets: &mut [Sheet], config_home: &Path) {
+    for sheet in sheets.iter_mut() {
+        let resolved = resolve_prefix(&sheet.name, config_home);
+        let title = sheet.title.take().unwrap_or_else(|| sheet.name.clone());
+        sheet.title = Some(render_title(&title, resolved.as_deref()));
+    }
+}
+
+fn render_title(template: &str, prefix: Option<&str>) -> String {
+    match prefix {
+        Some(p) => template.replace("{prefix}", p),
+        None => template
+            .replace(" (prefix: {prefix})", "")
+            .replace(", leader: {prefix})", ")")
+            .replace("{prefix}", "prefix"),
+    }
+}
+
+/// Resolve a tool's prefix/leader from the user's config. Returns a display
+/// string like `Ctrl+Space / Ctrl+b`.
+fn resolve_prefix(sheet: &str, config_home: &Path) -> Option<String> {
+    match sheet {
+        "tmux" => resolve_tmux_prefix(config_home),
+        "herdr" => resolve_herdr_prefix(config_home),
+        "nvim" => resolve_nvim_leader(config_home),
+        _ => None,
+    }
+}
+
+/// tmux chord notation (`C-Space`, `M-Enter`) to display form.
+fn tmux_chord(chord: &str) -> String {
+    display_chord(chord).join("+")
+}
+
+fn resolve_tmux_prefix(config_home: &Path) -> Option<String> {
+    let conf = config_home.join("tmux/tmux.conf");
+    let conf = if conf.exists() {
+        conf
+    } else {
+        // Pre-XDG location
+        let home = std::env::var("HOME").ok()?;
+        PathBuf::from(home).join(".tmux.conf")
+    };
+    let source = fs::read_to_string(conf).ok()?;
+
+    let mut prefixes = Vec::new();
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("set -g prefix ") {
+            prefixes.push(tmux_chord(rest.trim()));
+        } else if let Some(rest) = line.strip_prefix("set -g prefix2 ") {
+            prefixes.push(tmux_chord(rest.trim()));
+        }
+    }
+    (!prefixes.is_empty()).then(|| prefixes.join(" / "))
+}
+
+fn resolve_herdr_prefix(config_home: &Path) -> Option<String> {
+    let conf = config_home.join("herdr/config.toml");
+    let source = fs::read_to_string(conf).ok()?;
+    let doc: toml::Value = toml::from_str(&source).ok()?;
+    let prefix = doc.get("keys")?.get("prefix")?.as_str()?;
+    Some(display_chord(prefix).join("+"))
+}
+
+/// LazyVim reads `vim.g.mapleader`; default is Space. Scan the user's lua
+/// config for an override.
+fn resolve_nvim_leader(config_home: &Path) -> Option<String> {
+    let lua_dir = config_home.join("nvim/lua");
+    let source = read_lua_sources(&lua_dir)?;
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("vim.g.mapleader") {
+            let value = rest
+                .trim_start_matches(['=', ' ', '"'])
+                .trim_end_matches(['"', ' ']);
+            return Some(match value {
+                " " | "" => "Space".to_string(),
+                other => other.to_string(),
+            });
+        }
+    }
+    Some("Space".to_string())
+}
+
+fn read_lua_sources(dir: &Path) -> Option<String> {
+    let mut out = String::new();
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        for entry in fs::read_dir(dir).ok()?.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+            } else if path.extension().is_some_and(|ext| ext == "lua") {
+                out.push_str(&fs::read_to_string(path).unwrap_or_default());
+                out.push('\n');
+            }
+        }
+    }
+    (!out.is_empty()).then_some(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sheet::{Entry, Probe, Section};
+
+    fn entry(keys: &[&str], probe: Option<Probe>) -> Entry {
+        Entry {
+            keys: keys.iter().map(|s| (*s).to_string()).collect(),
+            description: "test".into(),
+            tags: vec![],
+            probe,
+        }
+    }
+
+    fn probe(command: &str, table: &str) -> Option<Probe> {
+        Some(Probe {
+            command: Some(command.to_string()),
+            table: Some(table.to_string()),
+            ..Default::default()
+        })
+    }
+
+    fn sheet_with(entries: Vec<Entry>) -> Sheet {
+        Sheet {
+            name: "tmux".into(),
+            title: None,
+            icon: None,
+            command: None,
+            sections: vec![Section {
+                name: "S".into(),
+                entries,
+            }],
+        }
+    }
+
+    #[test]
+    fn tmux_rewrites_keys_to_the_real_chord() {
+        // User remapped split-window -v to prefix b.
+        let keys = parse_tmux_list_keys("bind-key -T prefix b split-window -v\n");
+        let mut sheet = sheet_with(vec![entry(
+            &["prefix", "h"],
+            probe("split-window -v", "prefix"),
+        )]);
+        apply_tmux(&mut sheet, &keys);
+        assert_eq!(sheet.sections[0].entries[0].keys, ["prefix", "b"]);
+    }
+
+    #[test]
+    fn tmux_drops_defaults_the_user_unbound() {
+        let keys = parse_tmux_list_keys("bind-key -T prefix x kill-pane\n");
+        let mut sheet = sheet_with(vec![
+            entry(&["prefix", "x"], probe("kill-pane", "prefix")),
+            entry(&["prefix", "z"], probe("resize-pane -Z", "prefix")),
+            entry(&["static"], None),
+        ]);
+        apply_tmux(&mut sheet, &keys);
+        let kept: Vec<_> = sheet.sections[0]
+            .entries
+            .iter()
+            .map(|e| e.keys[0].clone())
+            .collect();
+        assert_eq!(
+            kept,
+            ["prefix", "static"],
+            "unbound zoom dropped, unprobed kept"
+        );
+    }
+
+    #[test]
+    fn tmux_family_keeps_curated_keys_when_anything_matches() {
+        let keys = parse_tmux_list_keys("bind-key -T root C-M-Left select-pane -L\n");
+        let mut sheet = sheet_with(vec![entry(
+            &["Ctrl", "Alt", "←/→/↑/↓"],
+            Some(Probe {
+                command: Some("select-pane".into()),
+                table: Some("root".into()),
+                family: true,
+                ..Default::default()
+            }),
+        )]);
+        apply_tmux(&mut sheet, &keys);
+        assert_eq!(
+            sheet.sections[0].entries[0].keys,
+            ["Ctrl", "Alt", "←/→/↑/↓"]
+        );
+    }
+
+    #[test]
+    fn tmux_prefers_the_curated_chord_among_shared_commands() {
+        let keys = parse_tmux_list_keys(
+            "bind-key -T prefix s choose-tree -s\nbind-key -T prefix w choose-tree -w\n",
+        );
+        let mut sheet = sheet_with(vec![entry(
+            &["prefix", "w"],
+            probe("choose-tree", "prefix"),
+        )]);
+        apply_tmux(&mut sheet, &keys);
+        assert_eq!(sheet.sections[0].entries[0].keys, ["prefix", "w"]);
+    }
+
+    #[test]
+    fn herdr_rewrites_with_prefer_and_drops_unbound() {
+        let mut actions = HashMap::new();
+        actions.insert(
+            "split_horizontal".to_string(),
+            vec!["prefix+b".to_string(), "alt+enter".to_string()],
+        );
+        actions.insert("zoom".to_string(), Vec::new());
+
+        let mut sheet = sheet_with(vec![
+            entry(
+                &["Alt", "Enter"],
+                Some(Probe {
+                    action: Some("split_horizontal".into()),
+                    prefer: Some("alt".into()),
+                    ..Default::default()
+                }),
+            ),
+            entry(
+                &["prefix", "z"],
+                Some(Probe {
+                    action: Some("zoom".into()),
+                    ..Default::default()
+                }),
+            ),
+        ]);
+        apply_herdr(&mut sheet, &actions);
+        assert_eq!(sheet.sections[0].entries.len(), 1);
+        assert_eq!(sheet.sections[0].entries[0].keys, ["Alt", "Enter"]);
+    }
 }

@@ -5,6 +5,7 @@ use clap::Parser;
 use cxx_qt_lib::{QGuiApplication, QQmlApplicationEngine, QString, QUrl};
 use omarchy_cheatsheets::cli::Cli;
 use omarchy_cheatsheets::load;
+use omarchy_cheatsheets::resolve;
 
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
@@ -16,7 +17,7 @@ fn main() -> anyhow::Result<()> {
     if cli.list_sections {
         let mut sheets =
             load::load_all(&load::default_overlay_dir()).context("loading cheatsheets")?;
-        load::apply_dynamic_prefixes(&mut sheets, &load::default_config_home());
+        resolve::apply_dynamic_prefixes(&mut sheets, &load::default_config_home());
         let sheets = load::filter_available(sheets, load::command_available);
         for sheet in &sheets {
             println!("{}\t{}", sheet.name, sheet.display_title());

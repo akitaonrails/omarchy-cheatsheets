@@ -101,7 +101,7 @@ impl Default for CheatsheetBridgeRust {
             }
         };
         let config_home = load::default_config_home();
-        load::apply_dynamic_prefixes(&mut sheets, &config_home);
+        resolve::apply_dynamic_prefixes(&mut sheets, &config_home);
         resolve::apply_resolved_bindings(&mut sheets, &config_home);
         let sheets = load::filter_available(sheets, load::command_available);
         Self {
