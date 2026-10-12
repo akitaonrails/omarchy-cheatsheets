@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Ctrl+0` change the font size; the whole layout scales with it.
   The window color is premultiplied, so lowering the opacity shows the
   desktop through on light themes too instead of washing out to white.
+  The opacity slider has a real hit area (it was laid out 0px tall, so its
+  handle could not be dragged).
 
 ### Changed
 

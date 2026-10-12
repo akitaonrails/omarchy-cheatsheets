@@ -421,11 +421,16 @@ ApplicationWindow {
                         stepSize: 1
                         value: Math.round(appSettings.opacity * 100)
                         onMoved: appSettings.applyOpacity(value / 100)
+                        // Implicit sizes are what give the Slider its height:
+                        // without them the layout makes it 0px tall and the
+                        // handle is drawn but can't be grabbed.
                         background: Rectangle {
                             x: opacitySlider.leftPadding
                             y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
+                            implicitWidth: window.px(160)
+                            implicitHeight: 4
                             width: opacitySlider.availableWidth
-                            height: 4
+                            height: implicitHeight
                             radius: 2
                             color: window.surface
                             Rectangle {
@@ -438,8 +443,8 @@ ApplicationWindow {
                         handle: Rectangle {
                             x: opacitySlider.leftPadding + opacitySlider.visualPosition * (opacitySlider.availableWidth - width)
                             y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
-                            width: window.px(16)
-                            height: width
+                            implicitWidth: window.px(16)
+                            implicitHeight: implicitWidth
                             radius: width / 2
                             color: opacitySlider.pressed ? window.fgBright : window.accent
                             border.color: window.bg

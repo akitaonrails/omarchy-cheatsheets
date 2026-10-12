@@ -230,6 +230,30 @@ fn main_qml_paints_the_window_with_the_premultiplied_color() {
 }
 
 #[test]
+fn opacity_slider_parts_have_implicit_sizes() {
+    // A custom background/handle without implicit sizes leaves the Slider
+    // 0px tall in its RowLayout: drawn, but no press ever reaches it.
+    let qml = include_str!("../../qml/Main.qml");
+    let start = qml.find("id: opacitySlider").expect("opacity slider");
+    let slider = &qml[start..];
+    let slider = &slider[..slider
+        .find("\n                    }\n")
+        .expect("slider end")];
+    for part in ["background: Rectangle {", "handle: Rectangle {"] {
+        let body = &slider[slider.find(part).expect(part)..];
+        let body = &body[..body.find("\n                        }").expect("part end")];
+        assert!(
+            body.contains("implicitWidth:"),
+            "{part} lacks implicitWidth"
+        );
+        assert!(
+            body.contains("implicitHeight:"),
+            "{part} lacks implicitHeight"
+        );
+    }
+}
+
+#[test]
 fn unparsable_colors_toml_is_an_error() {
     assert!(Palette::from_colors_toml("accent = ").is_err());
 }
