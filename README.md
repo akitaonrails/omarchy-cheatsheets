@@ -32,6 +32,14 @@ when the app is missing and launches it when present:
 omarchy plugin add https://github.com/akitaonrails/omarchy-cheatsheets.git --enable
 ```
 
+Runtime dependencies (`qt6-base`, `qt6-declarative`) are handled by the AUR
+packages. Removal:
+
+```bash
+omarchy plugin remove akitaonrails.cheatsheets   # bar widget, if added
+yay -R omarchy-cheatsheets-bin                   # or omarchy-cheatsheets
+```
+
 ## Usage
 
 ```bash
@@ -106,3 +114,7 @@ git push --follow-tags
 Tagging `vX.Y.Z` runs `.github/workflows/release.yml`: builds x86_64 and
 aarch64 tarballs, creates the GitHub release, and publishes both AUR packages
 (when the `AUR_SSH_PRIVATE_KEY` secret is set).
+
+## License
+
+[GPL-3.0-only](LICENSE) © 2026 Fabio Akita (akitaonrails)

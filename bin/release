@@ -26,12 +26,14 @@ cargo tf
 
 echo "== bump $current -> $version =="
 sed -i "0,/^version = \"$current\"/s//version = \"$version\"/" Cargo.toml
+# manifest.json carries the plugin's marketplace version; keep it in lockstep.
+sed -i "s/\"version\": \"$current\"/\"version\": \"$version\"/" manifest.json
 cargo check --locked --offline >/dev/null 2>&1 || cargo check >/dev/null
 
 today="$(date +%Y-%m-%d)"
 sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [$version] - $today/" CHANGELOG.md
 
-git add Cargo.toml Cargo.lock CHANGELOG.md
+git add Cargo.toml Cargo.lock CHANGELOG.md manifest.json
 git commit -m "release: v$version"
 git tag -a "v$version" -m "v$version"
 

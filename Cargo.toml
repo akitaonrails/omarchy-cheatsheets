@@ -3,7 +3,7 @@ name = "omarchy-cheatsheets"
 version = "0.1.1"
 edition = "2024"
 rust-version = "1.95"
-license = "MIT"
+license = "GPL-3.0-only"
 description = "Pretty, searchable Neovim and tmux cheatsheets for Omarchy Linux"
 
 [lib]
