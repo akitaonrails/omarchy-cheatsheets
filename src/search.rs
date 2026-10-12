@@ -104,6 +104,53 @@ pub fn filter(sheets: &[Sheet], query: &str) -> Vec<ScoredSection> {
     out
 }
 
+/// One matched entry with the labels needed to show it outside its sheet.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Hit {
+    /// Sheet merge key, e.g. "tmux".
+    pub sheet: String,
+    /// Display title of the sheet.
+    pub sheet_title: String,
+    /// Nerd Font glyph of the sheet, when it has one.
+    pub icon: Option<String>,
+    /// Section the entry belongs to.
+    pub section: String,
+    /// The matched binding.
+    pub entry: Entry,
+    /// Match quality, higher is better.
+    pub score: u32,
+}
+
+/// Rank every entry across `sheets` into one flat list, best match first,
+/// capped at `limit`. Ties keep curated order. A blank query yields nothing:
+/// the quick-search window shows a prompt instead of the whole corpus.
+pub fn rank(sheets: &[Sheet], query: &str, limit: usize) -> Vec<Hit> {
+    if query.trim().is_empty() {
+        return Vec::new();
+    }
+    let mut hits: Vec<Hit> = sheets
+        .iter()
+        .flat_map(|sheet| {
+            sheet.sections.iter().flat_map(move |section| {
+                section.entries.iter().filter_map(move |entry| {
+                    score(query, &entry.haystack()).map(|score| Hit {
+                        sheet: sheet.name.clone(),
+                        sheet_title: sheet.display_title().to_string(),
+                        icon: sheet.icon.clone(),
+                        section: section.name.clone(),
+                        entry: entry.clone(),
+                        score,
+                    })
+                })
+            })
+        })
+        .collect();
+    // sort_by_key is stable, which is what keeps ties in curated order.
+    hits.sort_by_key(|hit| std::cmp::Reverse(hit.score));
+    hits.truncate(limit);
+    hits
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -193,5 +240,91 @@ mod tests {
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].name, "Panes");
         assert_eq!(hits[0].sheet, "tmux");
+    }
+
+    fn entry(description: &str) -> Entry {
+        Entry {
+            keys: vec!["x".into()],
+            description: description.into(),
+            tags: vec![],
+            probe: None,
+        }
+    }
+
+    fn sheet(name: &str, section: &str, descriptions: &[&str]) -> Sheet {
+        Sheet {
+            name: name.into(),
+            title: None,
+            icon: None,
+            command: None,
+            sections: vec![crate::sheet::Section {
+                name: section.into(),
+                entries: descriptions.iter().map(|d| entry(d)).collect(),
+            }],
+        }
+    }
+
+    fn descriptions(hits: &[Hit]) -> Vec<(&str, &str)> {
+        hits.iter()
+            .map(|h| (h.sheet.as_str(), h.entry.description.as_str()))
+            .collect()
+    }
+
+    #[test]
+    fn rank_orders_globally_across_sheets() {
+        let sheets = [
+            sheet("nvim", "Windows", &["swap pane left it"]),
+            sheet("tmux", "Panes", &["split window"]),
+        ];
+        let hits = rank(&sheets, "split", 10);
+        assert_eq!(
+            descriptions(&hits),
+            [("tmux", "split window"), ("nvim", "swap pane left it")]
+        );
+    }
+
+    #[test]
+    fn rank_ties_keep_curated_order() {
+        let sheets = [
+            sheet("nvim", "Buffers", &["close buffer", "close all"]),
+            sheet("tmux", "Panes", &["close buffer"]),
+        ];
+        let hits = rank(&sheets, "close", 10);
+        assert_eq!(
+            descriptions(&hits),
+            [
+                ("nvim", "close buffer"),
+                ("nvim", "close all"),
+                ("tmux", "close buffer"),
+            ]
+        );
+    }
+
+    #[test]
+    fn rank_respects_limit() {
+        let sheets = [sheet("tmux", "Panes", &["close a", "close b", "close c"])];
+        assert_eq!(rank(&sheets, "close", 2).len(), 2);
+        assert!(rank(&sheets, "close", 0).is_empty());
+    }
+
+    #[test]
+    fn rank_blank_query_returns_nothing() {
+        let sheets = [sheet("tmux", "Panes", &["close pane"])];
+        assert!(rank(&sheets, "", 10).is_empty());
+        assert!(rank(&sheets, "   ", 10).is_empty());
+    }
+
+    #[test]
+    fn rank_carries_sheet_and_section_labels() {
+        let mut tmux = sheet("tmux", "Panes", &["split window"]);
+        tmux.title = Some("tmux (prefix C-Space)".into());
+        tmux.icon = Some("\u{ebc8}".into());
+        let hits = rank(&[tmux], "split", 10);
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].sheet, "tmux");
+        assert_eq!(hits[0].sheet_title, "tmux (prefix C-Space)");
+        assert_eq!(hits[0].icon.as_deref(), Some("\u{ebc8}"));
+        assert_eq!(hits[0].section, "Panes");
+        assert!(hits[0].score > 0);
     }
 }

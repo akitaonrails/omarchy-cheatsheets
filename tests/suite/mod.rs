@@ -4,4 +4,5 @@
 // declared here instead of living as a top-level tests/*.rs target.
 
 mod load_merge;
+mod quick_search;
 mod resolve;
