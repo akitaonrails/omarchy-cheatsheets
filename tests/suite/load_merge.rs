@@ -199,3 +199,19 @@ fn search_narrows_across_sheets() {
             .any(|e| e.entry.description.contains("Split"))
     );
 }
+
+#[test]
+fn settings_file_is_not_an_overlay() {
+    // settings.toml shares the overlay directory but is not a sheet; parsing
+    // it as one would fail the whole load (no `name` key).
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join(load::SETTINGS_FILE),
+        "theme = \"nord\"\nfont_size = 16\n",
+    )
+    .unwrap();
+
+    let with_settings = load::load_all(dir.path()).unwrap();
+    let embedded = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
+    assert_eq!(with_settings, embedded);
+}

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `~/.config/omarchy-cheatsheets/settings.toml` stores appearance settings
+  (`theme`, `font_family`, `font_size`, `opacity`); out-of-range values are
+  clamped. The name is reserved: the overlay loader skips it.
+
 ## [0.1.1] - 2026-10-12
 
 ### Added

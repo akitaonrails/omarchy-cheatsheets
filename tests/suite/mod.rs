@@ -5,3 +5,4 @@
 
 mod load_merge;
 mod resolve;
+mod settings;
