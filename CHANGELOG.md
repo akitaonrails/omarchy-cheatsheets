@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   clamped. The name is reserved: the overlay loader skips it.
 - Palettes come from Omarchy theme `colors.toml` files (stock and
   `~/.config/omarchy/themes`); missing colors fall back to Tokyo Night.
+- Appearance panel (gear button or `Ctrl+,`): theme, text font, font size and
+  window opacity, applied live and saved to `settings.toml`. `Ctrl+=` /
+  `Ctrl+-` / `Ctrl+0` change the font size; the whole layout scales with it.
+
+### Changed
+
+- The window follows the active Omarchy theme instead of always using Tokyo
+  Night (unchanged look on the stock theme). Esc closes the appearance panel
+  before it closes the app.
 
 ## [0.1.1] - 2026-10-12
 

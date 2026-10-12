@@ -6,6 +6,6 @@ fn main() {
     CxxQtBuilder::new_qml_module(QmlModule::new("omarchy.cheatsheets").qml_file("qml/Main.qml"))
         .qt_module("Gui")
         .qt_module("Qml")
-        .files(["src/bridge.rs"])
+        .files(["src/bridge.rs", "src/settings_bridge.rs"])
         .build();
 }

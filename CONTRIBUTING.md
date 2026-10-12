@@ -24,7 +24,9 @@ src/sheet.rs     data model (Sheet → Section → Entry, optional probe)
 src/load.rs      TOML parse, overlay merge, availability probe, prefix resolution
 src/resolve.rs   live binding resolution (tmux list-keys probe, herdr [keys])
 src/search.rs    fuzzy-lite matcher + scoring
+src/settings.rs  settings.toml load/save, Omarchy theme palettes
 src/bridge.rs    cxx-qt QObject exposed to QML (thin; no logic)
+src/settings_bridge.rs  cxx-qt QObject for appearance settings (thin)
 qml/Main.qml     all UI
 ```
 

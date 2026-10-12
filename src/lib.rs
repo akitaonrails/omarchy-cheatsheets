@@ -6,4 +6,5 @@ pub mod load;
 pub mod resolve;
 pub mod search;
 pub mod settings;
+pub mod settings_bridge;
 pub mod sheet;
