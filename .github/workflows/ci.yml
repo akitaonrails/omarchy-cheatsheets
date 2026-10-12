@@ -57,8 +57,11 @@ jobs:
       - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
         with:
           tool: cargo-nextest
-      # --all-targets deliberately excludes doctests, so run them separately
-      - run: cargo nextest run --workspace --all-targets --profile ci
+      # No --all-targets: it builds the bin test harness, and cxx-qt's
+      # whole-archive initializer statics fail to link with Ubuntu's gold.
+      # The bin is a shim with `test = false`; lib + suite cover the logic.
+      # Doctests are excluded from nextest either way, so run them separately.
+      - run: cargo nextest run --workspace --profile ci
       - run: cargo test --workspace --doc
 
   deny:
