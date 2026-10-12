@@ -3,6 +3,7 @@
 // One integration test binary per crate (house style): each suite file is
 // declared here instead of living as a top-level tests/*.rs target.
 
+mod cli;
 mod load_merge;
 mod quick_search;
 mod resolve;

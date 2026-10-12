@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Quick search window (`--search [QUERY]`): one field, one flat list ranked
+  across every sheet with the app and section on each row; ↑/↓ to move, Esc
+  to close. Opens with the same window class and size as the browser.
+
 ### Changed
 
+- Bar widget: left click opens the quick search, right click the full
+  browser. An older binary without `--search` falls back to the browser.
 - Search matches query words in any order ("pane split" finds "Split pane");
   every word must still match. Queries that matched before still match.
 

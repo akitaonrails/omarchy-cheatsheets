@@ -26,7 +26,8 @@ yay -S omarchy-cheatsheets       # build from source (AUR)
 ```
 
 Omarchy shell users can also add the bar widget, which offers the AUR install
-when the app is missing and launches it when present:
+when the app is missing. When present, left click opens the search window and
+right click the full browser:
 
 ```bash
 omarchy plugin add https://github.com/akitaonrails/omarchy-cheatsheets.git --enable
@@ -45,6 +46,8 @@ yay -R omarchy-cheatsheets-bin                   # or omarchy-cheatsheets
 ```bash
 omarchy-cheatsheets                  # all sheets
 omarchy-cheatsheets --section nvim   # open scoped to one tool
+omarchy-cheatsheets --search         # search-only window across every tool
+omarchy-cheatsheets --search "split" # ...pre-filled with a query
 omarchy-cheatsheets --list-sections  # machine-readable list of sheets
 ```
 
@@ -54,6 +57,7 @@ Suggested Hyprland bindings (`~/.config/hypr/bindings.lua`):
 o.bind("SUPER + N", "Neovim cheatsheet", { launch = "omarchy-cheatsheets --section nvim" })
 o.bind("SUPER + ALT + T", "Tmux cheatsheet", { launch = "omarchy-cheatsheets --section tmux" })
 o.bind("SUPER + CTRL + SLASH", "Cheatsheets", { launch = "omarchy-cheatsheets" })
+o.bind("SUPER + CTRL + ALT + SLASH", "Search cheatsheets", { launch = "omarchy-cheatsheets --search" })
 ```
 
 (SUPER+T is stock Omarchy's float toggle — hence SUPER+ALT+T.)
@@ -100,8 +104,8 @@ cargo deny check
 Layout: `src/sheet.rs` (model), `src/load.rs` (embedded + overlay merge,
 availability probe, prefix resolution), `src/resolve.rs` (live binding
 resolution), `src/search.rs` (scoring), `src/bridge.rs` (cxx-qt QObject),
-`qml/Main.qml` (all UI), `data/*.toml` (curated sheets), `plugin/` (Omarchy
-shell bar widget). Rules and gates live in [AGENTS.md](AGENTS.md); adding a
+`qml/Main.qml` + `qml/QuickSearch.qml` (all UI), `data/*.toml` (curated
+sheets), `plugin/` (Omarchy shell bar widget). Rules and gates live in [AGENTS.md](AGENTS.md); adding a
 new app's sheet is documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release
