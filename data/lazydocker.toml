@@ -1,0 +1,139 @@
+name = "lazydocker"
+title = "lazydocker"
+icon = "\uf21f"
+command = "lazydocker"
+
+[[sections]]
+name = "Navigation"
+
+[[sections.entries]]
+keys = ["q", "Esc"]
+description = "Quit / return"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Enter"]
+description = "Focus main panel (logs/details)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["[", "]"]
+description = "Previous / next tab"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["/"]
+description = "Filter list"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["1..6"]
+description = "Jump to Projects / Services / Containers / Images / Volumes / Networks"
+tags = []
+
+[[sections.entries]]
+keys = ["+ / _"]
+description = "Cycle screen mode (normal/half/fullscreen)"
+tags = []
+
+[[sections]]
+name = "Containers"
+
+[[sections.entries]]
+keys = ["s"]
+description = "Stop container"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["r"]
+description = "Restart container"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["p"]
+description = "Pause container"
+tags = []
+
+[[sections.entries]]
+keys = ["d"]
+description = "Remove container"
+tags = []
+
+[[sections.entries]]
+keys = ["a"]
+description = "Attach to container"
+tags = []
+
+[[sections.entries]]
+keys = ["m"]
+description = "View logs"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["E"]
+description = "Exec shell in container"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["e"]
+description = "Hide / show stopped containers"
+tags = []
+
+[[sections.entries]]
+keys = ["w"]
+description = "Open first published port in browser"
+tags = []
+
+[[sections.entries]]
+keys = ["b"]
+description = "Bulk commands"
+tags = ["rare"]
+
+[[sections]]
+name = "Services (compose)"
+
+[[sections.entries]]
+keys = ["u"]
+description = "Up service"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["S"]
+description = "Start service"
+tags = []
+
+[[sections.entries]]
+keys = ["s"]
+description = "Stop service"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["R"]
+description = "Restart options"
+tags = []
+
+[[sections.entries]]
+keys = ["U / D"]
+description = "Up / down whole project"
+tags = []
+
+[[sections]]
+name = "Images, volumes, networks"
+
+[[sections.entries]]
+keys = ["d"]
+description = "Remove selected image / volume / network"
+tags = []
+
+[[sections.entries]]
+keys = ["b"]
+description = "Bulk commands (incl. prune)"
+tags = []
+
+[[sections]]
+name = "Project"
+
+[[sections.entries]]
+keys = ["e / o"]
+description = "Edit / open lazydocker config"
+tags = ["rare"]

@@ -1,0 +1,358 @@
+name = "nvim"
+title = "Neovim (LazyVim, leader: Space)"
+icon = "\ue795"
+command = "nvim"
+
+[[sections]]
+name = "Find & search"
+
+[[sections.entries]]
+keys = ["Space", "Space"]
+description = "Find files"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "/"]
+description = "Grep (search text in project)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "f", "r"]
+description = "Recent files"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", ","]
+description = "Switch buffer"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "s", "w"]
+description = "Search word under cursor"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "s", "b"]
+description = "Search lines in current buffer"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "s", "h"]
+description = "Search help pages"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "s", "k"]
+description = "Search keymaps"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "s", "r"]
+description = "Resume last search"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", ":"]
+description = "Command history"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "e"]
+description = "File explorer (toggle)"
+tags = ["daily"]
+
+[[sections]]
+name = "Files & buffers"
+
+[[sections.entries]]
+keys = ["Ctrl", "s"]
+description = "Save file"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "f", "n"]
+description = "New file"
+tags = []
+
+[[sections.entries]]
+keys = ["Shift", "h / l"]
+description = "Previous / next buffer"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["[b", "]b"]
+description = "Previous / next buffer"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "b", "d"]
+description = "Delete buffer"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "b", "o"]
+description = "Delete other buffers"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "b", "b"]
+description = "Buffer picker"
+tags = []
+
+[[sections]]
+name = "Windows & splits"
+
+[[sections.entries]]
+keys = ["Ctrl", "h/j/k/l"]
+description = "Move focus between windows"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "w", "-"]
+description = "Split window below"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "w", "|"]
+description = "Split window right"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "w", "d"]
+description = "Delete window"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "w", "w"]
+description = "Other window"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "↑/↓/←/→"]
+description = "Resize window"
+tags = []
+
+[[sections]]
+name = "Motions"
+
+[[sections.entries]]
+keys = ["h j k l"]
+description = "Left / down / up / right"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["w", "b", "e"]
+description = "Word forward / back / end"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["0", "^", "$"]
+description = "Line start / first char / end"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["gg", "G"]
+description = "File top / bottom"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "d / u"]
+description = "Half-page down / up"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["{", "}"]
+description = "Paragraph back / forward"
+tags = []
+
+[[sections.entries]]
+keys = ["%"]
+description = "Jump to matching bracket"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["f{char}", ";"]
+description = "Find char on line, repeat"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["*", "#"]
+description = "Search word under cursor fwd / back"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["n", "N"]
+description = "Next / previous search match"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["m{a-z}", "'{a-z}"]
+description = "Set mark / jump to mark"
+tags = []
+
+[[sections]]
+name = "Editing"
+
+[[sections.entries]]
+keys = ["u", "Ctrl+r"]
+description = "Undo / redo"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["dd", "yy", "p"]
+description = "Cut line / yank line / paste"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["ciw", "di\""]
+description = "Change inner word / delete inside quotes (text objects)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["gc", "gcc"]
+description = "Comment selection / line"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "j / k"]
+description = "Move line / selection down / up"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = [". "]
+description = "Repeat last change"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["J"]
+description = "Join lines"
+tags = []
+
+[[sections.entries]]
+keys = ["o", "O"]
+description = "New line below / above"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["q{a-z}", "@{a-z}"]
+description = "Record / play macro"
+tags = ["rare"]
+
+[[sections.entries]]
+keys = ["v / V / Ctrl-v"]
+description = "Visual char / line / block select"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Esc"]
+description = "Clear search highlight"
+tags = []
+
+[[sections]]
+name = "LSP & code"
+
+[[sections.entries]]
+keys = ["g", "d"]
+description = "Go to definition"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["g", "r"]
+description = "References"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["g", "I"]
+description = "Go to implementation"
+tags = []
+
+[[sections.entries]]
+keys = ["K"]
+description = "Hover documentation"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "c", "a"]
+description = "Code action"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "c", "r"]
+description = "Rename symbol"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "c", "f"]
+description = "Format buffer"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["]d", "[d"]
+description = "Next / previous diagnostic"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "c", "d"]
+description = "Line diagnostics float"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "x", "x"]
+description = "Diagnostics list (Trouble)"
+tags = []
+
+[[sections]]
+name = "Git"
+
+[[sections.entries]]
+keys = ["Space", "g", "g"]
+description = "Lazygit"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "g", "b"]
+description = "Blame line"
+tags = []
+
+[[sections.entries]]
+keys = ["]h", "[h"]
+description = "Next / previous hunk"
+tags = []
+
+[[sections]]
+name = "Toggles & misc"
+
+[[sections.entries]]
+keys = ["Ctrl", "/"]
+description = "Terminal (toggle)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "u", "f"]
+description = "Toggle auto-format"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "u", "s"]
+description = "Toggle spelling"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "u", "w"]
+description = "Toggle word wrap"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "u", "h"]
+description = "Toggle inlay hints"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "q", "q"]
+description = "Quit all"
+tags = []
+
+[[sections.entries]]
+keys = ["Space", "l"]
+description = "Lazy (plugin manager)"
+tags = []

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Cheatsheets
+Comment=Searchable Neovim, tmux and tool cheatsheets
+Exec=omarchy-cheatsheets
+Icon=help-contents
+Type=Application
+Categories=Utility;Documentation;
+Keywords=cheatsheet;keybindings;shortcuts;nvim;tmux;
+StartupNotify=false

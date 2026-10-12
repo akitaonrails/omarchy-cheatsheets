@@ -1,0 +1,141 @@
+name = "herdr"
+title = "Herdr (prefix: Ctrl-b)"
+icon = "\uf085"
+command = "herdr"
+
+[[sections]]
+name = "Prefix & basics"
+
+[[sections.entries]]
+keys = ["Ctrl", "b"]
+description = "Prefix key"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "?"]
+description = "Help / keybindings"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "q"]
+description = "Reload config"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "d"]
+description = "Detach from session"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "["]
+description = "Copy mode"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "\\"]
+description = "Toggle sidebar"
+tags = ["daily"]
+
+[[sections]]
+name = "Panes"
+
+[[sections.entries]]
+keys = ["Alt", "Enter"]
+description = "Split pane horizontally"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "Shift", "Enter"]
+description = "Split pane vertically"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "h / v"]
+description = "Split pane horizontal / vertical"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "←/→/↑/↓"]
+description = "Focus pane (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "Shift", "←/→/↑/↓"]
+description = "Resize pane (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "x"]
+description = "Close pane (also Alt-Esc)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "z"]
+description = "Zoom pane"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", ";"]
+description = "Last pane"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "Shift", "O"]
+description = "Rename pane"
+tags = ["rare"]
+
+[[sections]]
+name = "Tabs"
+
+[[sections.entries]]
+keys = ["prefix", "c"]
+description = "New tab"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "1..9"]
+description = "Switch to tab by number (also Alt-1..9)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "p / n"]
+description = "Previous / next tab (also Alt-←/→)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "Shift", "←/→"]
+description = "Move tab left / right"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "r"]
+description = "Rename tab"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "k"]
+description = "Close tab"
+tags = []
+
+[[sections]]
+name = "Workspaces"
+
+[[sections.entries]]
+keys = ["prefix", "Shift", "C"]
+description = "New workspace"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "Shift", "R"]
+description = "Rename workspace"
+tags = ["rare"]
+
+[[sections.entries]]
+keys = ["prefix", "Shift", "K"]
+description = "Close workspace"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "Shift", "P / N"]
+description = "Previous / next workspace (also Alt-↑/↓)"
+tags = []

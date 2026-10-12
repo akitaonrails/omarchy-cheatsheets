@@ -1,0 +1,174 @@
+name = "btop"
+title = "btop"
+icon = "\uf201"
+command = "btop"
+
+[[sections]]
+name = "General"
+
+[[sections.entries]]
+keys = ["q", "Ctrl+c"]
+description = "Quit"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Esc", "m"]
+description = "Toggle main menu"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["F1", "?", "h"]
+description = "Help"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["F2", "o"]
+description = "Options"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "r"]
+description = "Reload config from disk"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "z"]
+description = "Suspend to background"
+tags = []
+
+[[sections.entries]]
+keys = ["+ / -"]
+description = "Faster / slower update timer (100ms steps)"
+tags = []
+
+[[sections]]
+name = "Layout"
+
+[[sections.entries]]
+keys = ["p", "Shift+p"]
+description = "Cycle view presets forward / backward"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["1 / 2 / 3 / 4 / 5"]
+description = "Toggle CPU / MEM / NET / PROC / GPU box"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["d"]
+description = "Toggle disks view in MEM box"
+tags = []
+
+[[sections]]
+name = "Process list"
+
+[[sections.entries]]
+keys = ["↑/↓", "PgUp/PgDn", "Home/End"]
+description = "Navigate process list"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["←/→"]
+description = "Select sorting column"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["r"]
+description = "Reverse sorting order"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["f", "/"]
+description = "Filter processes (! prefix for regex)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Delete"]
+description = "Clear filter"
+tags = []
+
+[[sections.entries]]
+keys = ["Enter"]
+description = "Detailed info for selected process"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["e"]
+description = "Toggle tree view"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Space", "C", "E"]
+description = "Collapse/expand process / children / all (tree view)"
+tags = []
+
+[[sections.entries]]
+keys = ["c"]
+description = "Toggle per-core CPU usage"
+tags = []
+
+[[sections.entries]]
+keys = ["%"]
+description = "Toggle memory display mode"
+tags = []
+
+[[sections.entries]]
+keys = ["F"]
+description = "Follow selected process"
+tags = []
+
+[[sections.entries]]
+keys = ["u"]
+description = "Pause process list"
+tags = []
+
+[[sections]]
+name = "Process control"
+
+[[sections.entries]]
+keys = ["t"]
+description = "Terminate selected process (SIGTERM)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["k"]
+description = "Kill selected process (SIGKILL)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["s"]
+description = "Send chosen signal to process"
+tags = []
+
+[[sections.entries]]
+keys = ["N"]
+description = "Set nice value for process"
+tags = ["rare"]
+
+[[sections]]
+name = "Network"
+
+[[sections.entries]]
+keys = ["b / n"]
+description = "Previous / next network device"
+tags = []
+
+[[sections.entries]]
+keys = ["a"]
+description = "Toggle auto scaling for net graphs"
+tags = []
+
+[[sections.entries]]
+keys = ["y"]
+description = "Toggle synced scaling mode"
+tags = []
+
+[[sections.entries]]
+keys = ["z"]
+description = "Reset totals for current device"
+tags = []
+
+[[sections.entries]]
+keys = ["i"]
+description = "Toggle disks IO mode with big graphs"
+tags = ["rare"]

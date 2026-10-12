@@ -1,0 +1,156 @@
+//! Fuzzy-lite search over cheatsheets: case-insensitive subsequence matching
+//! with a small scoring model so the best matches sort first.
+
+use crate::sheet::{Entry, Sheet};
+
+/// Score `text` against `query`: `Some(score)` when every query char appears
+/// in order (case-insensitive), `None` otherwise. Higher is better.
+///
+/// Scoring rewards consecutive runs and word/key-boundary hits so that e.g.
+/// "sp" prefers "split pane" over "swap pane". Kept deliberately simple —
+/// the corpus is hundreds of entries, not millions.
+pub fn score(query: &str, text: &str) -> Option<u32> {
+    let query: Vec<char> = query.chars().flat_map(char::to_lowercase).collect();
+    if query.is_empty() {
+        return Some(0);
+    }
+    let text: Vec<char> = text.chars().flat_map(char::to_lowercase).collect();
+
+    let mut score = 0u32;
+    let mut qi = 0;
+    let mut prev_matched = false;
+    for (i, &c) in text.iter().enumerate() {
+        if qi < query.len() && c == query[qi] {
+            score += 1;
+            if prev_matched {
+                score += 3; // consecutive run
+            }
+            if i == 0 || text[i - 1].is_whitespace() || "-_+/".contains(text[i - 1]) {
+                score += 2; // word boundary
+            }
+            qi += 1;
+            prev_matched = true;
+        } else {
+            prev_matched = false;
+        }
+    }
+    (qi == query.len()).then_some(score)
+}
+
+/// One entry plus its match score, for sorted rendering.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ScoredEntry {
+    /// The matched binding.
+    pub entry: Entry,
+    /// Match quality; meaningless when the query is empty.
+    pub score: u32,
+}
+
+/// A section that survived filtering, with its matched entries.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ScoredSection {
+    /// Section name.
+    pub name: String,
+    /// Sheet this section belongs to (merge key of the parent).
+    pub sheet: String,
+    /// Matched entries, best score first.
+    pub entries: Vec<ScoredEntry>,
+}
+
+/// Filter and rank every entry across `sheets`. Empty query returns all
+/// entries in their curated order with score 0.
+pub fn filter(sheets: &[Sheet], query: &str) -> Vec<ScoredSection> {
+    let query = query.trim();
+    let mut out = Vec::new();
+    for sheet in sheets {
+        for section in &sheet.sections {
+            let mut entries: Vec<ScoredEntry> = section
+                .entries
+                .iter()
+                .filter_map(|entry| {
+                    if query.is_empty() {
+                        return Some(ScoredEntry {
+                            entry: entry.clone(),
+                            score: 0,
+                        });
+                    }
+                    score(query, &entry.haystack()).map(|score| ScoredEntry {
+                        entry: entry.clone(),
+                        score,
+                    })
+                })
+                .collect();
+            if !query.is_empty() {
+                entries.sort_by_key(|e| std::cmp::Reverse(e.score));
+            }
+            if !entries.is_empty() {
+                out.push(ScoredSection {
+                    name: section.name.clone(),
+                    sheet: sheet.name.clone(),
+                    entries,
+                });
+            }
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_query_matches_everything_with_zero_score() {
+        assert_eq!(score("", "anything"), Some(0));
+    }
+
+    #[test]
+    fn subsequence_must_match_in_order() {
+        assert!(score("sp", "split pane").is_some());
+        assert!(score("ps", "split pane").is_none());
+    }
+
+    #[test]
+    fn matching_is_case_insensitive() {
+        assert!(score("CSP", "Ctrl Space prefix").is_some());
+    }
+
+    #[test]
+    fn consecutive_word_boundary_beats_scattered() {
+        let good = score("split", "split window").expect("matches");
+        let bad = score("split", "swap pane left it").expect("matches");
+        assert!(good > bad);
+    }
+
+    #[test]
+    fn filter_drops_empty_sections_and_keeps_structure() {
+        let sheet = Sheet {
+            name: "tmux".into(),
+            title: None,
+            icon: None,
+            command: None,
+            sections: vec![
+                crate::sheet::Section {
+                    name: "Panes".into(),
+                    entries: vec![Entry {
+                        keys: vec!["Alt".into(), "Enter".into()],
+                        description: "split pane vertically".into(),
+                        tags: vec![],
+                    }],
+                },
+                crate::sheet::Section {
+                    name: "Sessions".into(),
+                    entries: vec![Entry {
+                        keys: vec!["d".into()],
+                        description: "detach session".into(),
+                        tags: vec![],
+                    }],
+                },
+            ],
+        };
+        let hits = filter(&[sheet], "split");
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].name, "Panes");
+        assert_eq!(hits[0].sheet, "tmux");
+    }
+}

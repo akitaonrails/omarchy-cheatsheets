@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Release driver: runs the gates, bumps the version, moves the changelog,
+# commits and tags. Intentionally does NOT push — review, then
+# `git push --follow-tags`.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+version="${1:-}"
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "usage: bin/release X.Y.Z" >&2
+    exit 1
+fi
+
+current="$(awk '/^\[package\]/{f=1} f && /^version = /{gsub(/"/, "", $3); print $3; exit}' Cargo.toml)"
+if [[ "$current" == "$version" ]]; then
+    echo "Cargo.toml is already at $version" >&2
+    exit 1
+fi
+
+echo "== gates =="
+cargo fmt --all -- --check
+git diff --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo tf
+
+echo "== bump $current -> $version =="
+sed -i "0,/^version = \"$current\"/s//version = \"$version\"/" Cargo.toml
+cargo check --locked --offline >/dev/null 2>&1 || cargo check >/dev/null
+
+today="$(date +%Y-%m-%d)"
+sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [$version] - $today/" CHANGELOG.md
+
+git add Cargo.toml Cargo.lock CHANGELOG.md
+git commit -m "release: v$version"
+git tag -a "v$version" -m "v$version"
+
+echo "Tagged v$version. Review, then: git push --follow-tags"
+echo "After the release publishes: cargo clean (see AGENTS.md cleanup rules)."

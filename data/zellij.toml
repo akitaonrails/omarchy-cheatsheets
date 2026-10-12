@@ -1,0 +1,187 @@
+name = "zellij"
+title = "Zellij (modal, default bindings)"
+icon = "\uf120"
+command = "zellij"
+
+[[sections]]
+name = "Modes"
+
+[[sections.entries]]
+keys = ["Ctrl", "p"]
+description = "Pane mode"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "t"]
+description = "Tab mode"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "n"]
+description = "Resize mode"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "h"]
+description = "Move mode (reposition panes)"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "s"]
+description = "Scroll mode"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "o"]
+description = "Session mode"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "g"]
+description = "Lock / unlock all input"
+tags = ["rare"]
+
+[[sections.entries]]
+keys = ["Esc", "Enter"]
+description = "Back to normal mode"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "q"]
+description = "Quit zellij"
+tags = ["daily"]
+
+[[sections]]
+name = "Panes (quick, no mode)"
+
+[[sections.entries]]
+keys = ["Alt", "n"]
+description = "New pane"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "←/→/↑/↓ or h/j/k/l"]
+description = "Move focus between panes"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "= / -"]
+description = "Grow / shrink pane"
+tags = []
+
+[[sections.entries]]
+keys = ["Alt", "[ / ]"]
+description = "Resize pane left / right"
+tags = []
+
+[[sections.entries]]
+keys = ["Alt", "f"]
+description = "Toggle floating panes"
+tags = []
+
+[[sections.entries]]
+keys = ["Alt", "w"]
+description = "Toggle floating pane focus (in floating)"
+tags = ["rare"]
+
+[[sections]]
+name = "Pane mode (Ctrl-p)"
+
+[[sections.entries]]
+keys = ["n"]
+description = "New pane"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["x"]
+description = "Close focused pane"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["f"]
+description = "Toggle pane fullscreen"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["z"]
+description = "Toggle pane frames"
+tags = []
+
+[[sections.entries]]
+keys = ["c"]
+description = "Rename pane"
+tags = []
+
+[[sections.entries]]
+keys = ["d / u"]
+description = "Split down / right... (directional new pane)"
+tags = []
+
+[[sections]]
+name = "Tab mode (Ctrl-t)"
+
+[[sections.entries]]
+keys = ["n"]
+description = "New tab"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["x"]
+description = "Close tab"
+tags = []
+
+[[sections.entries]]
+keys = ["r"]
+description = "Rename tab"
+tags = []
+
+[[sections.entries]]
+keys = ["←/→ or h/l"]
+description = "Previous / next tab"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["1..9"]
+description = "Go to tab by number"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["s"]
+description = "Sync input across panes in tab"
+tags = ["rare"]
+
+[[sections]]
+name = "Scroll & search (Ctrl-s)"
+
+[[sections.entries]]
+keys = ["↑/↓ or j/k"]
+description = "Scroll"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["e"]
+description = "Edit scrollback in $EDITOR"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["s"]
+description = "Enter search mode"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "c"]
+description = "Cancel scroll / search"
+tags = []
+
+[[sections]]
+name = "Session (Ctrl-o)"
+
+[[sections.entries]]
+keys = ["d"]
+description = "Detach session"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["w"]
+description = "Session manager"
+tags = []

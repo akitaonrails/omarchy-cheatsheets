@@ -1,0 +1,67 @@
+[package]
+name = "omarchy-cheatsheets"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+description = "Pretty, searchable Neovim and tmux cheatsheets for Omarchy Linux"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "omarchy-cheatsheets"
+path = "src/main.rs"
+# main.rs is a shim; without this, cargo test builds a second heavy harness binary
+test = false
+
+# One integration test binary per crate: every test binary is a link (and a
+# first-run malware scan on some platforms), so suite files hang off mod.rs.
+[[test]]
+name = "suite"
+path = "tests/suite/mod.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+cxx = "1"
+cxx-qt = "0.10"
+cxx-qt-lib = { version = "0.10", features = ["qt_gui", "qt_qml"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+[build-dependencies]
+cxx-qt-build = "0.10"
+
+[dev-dependencies]
+rstest = "0.26"
+tempfile = "3"
+
+[lints.rust]
+# deny (not forbid): cxx-qt's #[cxx_qt::bridge] macro generates unsafe blocks,
+# so src/bridge.rs carries a targeted #[allow(unsafe_code)]. Handwritten unsafe
+# stays banned everywhere else.
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[profile.dev]
+opt-level = 0
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+opt-level = 1
+
+[profile.dev.build-override]
+opt-level = 3

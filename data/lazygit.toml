@@ -1,0 +1,224 @@
+name = "lazygit"
+title = "lazygit"
+icon = "\uf1d3"
+command = "lazygit"
+
+[[sections]]
+name = "Navigation"
+
+[[sections.entries]]
+keys = ["q", "Ctrl+c"]
+description = "Quit"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["?"]
+description = "Open keybindings menu"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Tab / 0 / Esc"]
+description = "Focus main view / back to side panel"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["[", "]"]
+description = "Previous / next tab in panel"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["/"]
+description = "Filter current view by text"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["1..5"]
+description = "Jump to Status / Files / Branches / Commits / Stash panel"
+tags = []
+
+[[sections.entries]]
+keys = ["h j k l"]
+description = "Move within panel"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["z / Z"]
+description = "Undo / redo (via reflog)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["R"]
+description = "Refresh git state"
+tags = []
+
+[[sections]]
+name = "Files & staging"
+
+[[sections.entries]]
+keys = ["Space"]
+description = "Stage / unstage file"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["a"]
+description = "Stage / unstage all"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["c"]
+description = "Commit staged changes"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["C"]
+description = "Commit using editor"
+tags = []
+
+[[sections.entries]]
+keys = ["w"]
+description = "Commit without pre-commit hook"
+tags = []
+
+[[sections.entries]]
+keys = ["A"]
+description = "Amend last commit"
+tags = []
+
+[[sections.entries]]
+keys = ["d"]
+description = "Discard changes to file"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["e"]
+description = "Edit file in editor"
+tags = []
+
+[[sections.entries]]
+keys = ["s"]
+description = "Stash all changes"
+tags = []
+
+[[sections.entries]]
+keys = ["i"]
+description = "Ignore / exclude file"
+tags = ["rare"]
+
+[[sections]]
+name = "Commits"
+
+[[sections.entries]]
+keys = ["s"]
+description = "Squash into commit below"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["f"]
+description = "Fixup into commit below"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["r"]
+description = "Reword commit message"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["d"]
+description = "Drop commit"
+tags = []
+
+[[sections.entries]]
+keys = ["e / i"]
+description = "Edit commit / start interactive rebase"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "j / k"]
+description = "Move commit down / up"
+tags = []
+
+[[sections.entries]]
+keys = ["C", "V"]
+description = "Copy (cherry-pick) / paste commits"
+tags = []
+
+[[sections.entries]]
+keys = ["t"]
+description = "Revert commit"
+tags = []
+
+[[sections.entries]]
+keys = ["A"]
+description = "Amend commit with staged changes"
+tags = []
+
+[[sections.entries]]
+keys = ["Space"]
+description = "Checkout commit (detached HEAD)"
+tags = ["rare"]
+
+[[sections]]
+name = "Branches"
+
+[[sections.entries]]
+keys = ["Space"]
+description = "Checkout branch"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["n"]
+description = "New branch"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["-"]
+description = "Checkout previous branch"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["d"]
+description = "Delete branch"
+tags = []
+
+[[sections.entries]]
+keys = ["r"]
+description = "Rebase onto selected branch"
+tags = []
+
+[[sections.entries]]
+keys = ["M"]
+description = "Merge selected branch"
+tags = []
+
+[[sections.entries]]
+keys = ["o"]
+description = "Create pull request"
+tags = []
+
+[[sections.entries]]
+keys = ["P / p"]
+description = "Push / pull"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["f"]
+description = "Fetch (in Files panel) / fast-forward (branches)"
+tags = []
+
+[[sections]]
+name = "Stash"
+
+[[sections.entries]]
+keys = ["Space"]
+description = "Apply stash entry"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["g"]
+description = "Pop stash entry"
+tags = []
+
+[[sections.entries]]
+keys = ["d"]
+description = "Drop stash entry"
+tags = []

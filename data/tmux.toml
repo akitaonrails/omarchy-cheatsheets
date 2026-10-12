@@ -1,0 +1,194 @@
+name = "tmux"
+title = "tmux (prefix: Ctrl-Space)"
+icon = "\uf489"
+command = "tmux"
+
+[[sections]]
+name = "Prefix & basics"
+
+[[sections.entries]]
+keys = ["Ctrl", "Space"]
+description = "Prefix key (fallback: Ctrl-b)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "?"]
+description = "List all key bindings"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "q"]
+description = "Reload tmux.conf"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", ":"]
+description = "Command prompt"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "d"]
+description = "Detach from session"
+tags = ["daily"]
+
+[[sections]]
+name = "Panes"
+
+[[sections.entries]]
+keys = ["Alt", "Enter"]
+description = "Split pane vertically (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "Shift", "Enter"]
+description = "Split pane horizontally (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "h"]
+description = "Split pane vertically"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "v"]
+description = "Split pane horizontally"
+tags = []
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "←/→/↑/↓"]
+description = "Move focus between panes (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "Shift", "←/→/↑/↓"]
+description = "Resize pane by 5 cells (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "x"]
+description = "Kill current pane"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "z"]
+description = "Zoom pane (toggle fullscreen)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "{ / }"]
+description = "Swap pane with previous/next"
+tags = ["rare"]
+
+[[sections.entries]]
+keys = ["prefix", "Space"]
+description = "Cycle pane layouts"
+tags = ["rare"]
+
+[[sections]]
+name = "Windows"
+
+[[sections.entries]]
+keys = ["prefix", "c"]
+description = "New window (in current path)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "1..9"]
+description = "Jump to window by number (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "←/→"]
+description = "Previous / next window (no prefix)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Alt", "Shift", "←/→"]
+description = "Move window left / right (no prefix)"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "r"]
+description = "Rename current window"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "k"]
+description = "Kill current window"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "w"]
+description = "Window picker (choose-tree)"
+tags = ["rare"]
+
+[[sections]]
+name = "Sessions"
+
+[[sections.entries]]
+keys = ["prefix", "C"]
+description = "New session (in current path)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "R"]
+description = "Rename current session"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "K"]
+description = "Kill current session"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "P / N"]
+description = "Switch to previous / next session"
+tags = []
+
+[[sections.entries]]
+keys = ["Alt", "↑/↓"]
+description = "Switch to previous / next session (no prefix)"
+tags = []
+
+[[sections.entries]]
+keys = ["prefix", "s"]
+description = "Session picker (choose-tree)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "("]
+description = "Switch to previous session (stock)"
+tags = ["rare"]
+
+[[sections]]
+name = "Copy mode (vi)"
+
+[[sections.entries]]
+keys = ["prefix", "["]
+description = "Enter copy mode (scroll back)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["v"]
+description = "Begin selection (in copy mode)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["y"]
+description = "Copy selection and exit (in copy mode)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["prefix", "]"]
+description = "Paste from buffer"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["q"]
+description = "Quit copy mode"
+tags = []
+
+[[sections.entries]]
+keys = ["/", "?"]
+description = "Search down / up (in copy mode)"
+tags = []
