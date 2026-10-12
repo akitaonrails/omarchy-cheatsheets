@@ -33,6 +33,10 @@ jobs:
     name: binary ${{ matrix.target.name }}
     needs: validate-version
     runs-on: ${{ matrix.target.os }}
+    # Ubuntu's Qt6 mkspecs inject -fuse-ld=gold; gold drops cxx-qt's
+    # whole-archive initializer symbols. lld (last flag wins) works.
+    env:
+      RUSTFLAGS: "-D warnings -C link-arg=-fuse-ld=lld"
     strategy:
       fail-fast: false
       matrix:
@@ -44,7 +48,7 @@ jobs:
       - name: Install Qt6 and build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt6-base-dev qt6-declarative-dev libclang-dev cmake
+          sudo apt-get install -y qt6-base-dev qt6-declarative-dev libclang-dev cmake lld
       - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
         with:
           toolchain: "1.95"
