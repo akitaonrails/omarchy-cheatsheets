@@ -11,7 +11,7 @@ use core::pin::Pin;
 use std::path::PathBuf;
 
 use cxx_qt::CxxQtType;
-use cxx_qt_lib::{QMap, QMapPair_QString_QVariant, QString, QStringList, QVariant};
+use cxx_qt_lib::{QList, QMap, QMapPair_QString_QVariant, QString, QVariant};
 
 use crate::settings::{self, Palette, Settings, ThemeRoots};
 
@@ -23,9 +23,9 @@ pub mod qobject {
         /// An alias to the QString type
         type QString = cxx_qt_lib::QString;
 
-        include!("cxx-qt-lib/qstringlist.h");
-        /// An alias to the QStringList type
-        type QStringList = cxx_qt_lib::QStringList;
+        include!("cxx-qt-lib/qlist.h");
+        /// An alias to the QVariantList type
+        type QList_QVariant = cxx_qt_lib::QList<cxx_qt_lib::QVariant>;
 
         include!("cxx-qt-lib/qmap.h");
         /// An alias to the QVariantMap type
@@ -39,16 +39,25 @@ pub mod qobject {
         #[qproperty(QString, font_family, READ, NOTIFY)]
         #[qproperty(i32, font_size, READ, NOTIFY)]
         #[qproperty(f64, opacity, READ, NOTIFY)]
+        #[qproperty(i32, font_size_min, READ, CONSTANT)]
+        #[qproperty(i32, font_size_max, READ, CONSTANT)]
+        #[qproperty(f64, opacity_min, READ, CONSTANT)]
         type AppSettings = super::AppSettingsRust;
 
         /// Current palette as a map keyed by QML color property names.
         #[qinvokable]
         fn colors(self: &AppSettings) -> QMap_QString_QVariant;
 
-        /// "omarchy" (follow the active theme) followed by installed themes.
+        /// Theme picker cards: maps with `name`, `label`, `detail` and
+        /// `colors` (same keys as `colors()`), "Follow Omarchy" first.
         #[qinvokable]
-        #[cxx_name = "themeNames"]
-        fn theme_names(self: &AppSettings) -> QStringList;
+        #[cxx_name = "themeChoices"]
+        fn theme_choices(self: &AppSettings) -> QList_QVariant;
+
+        /// Settings file location for display, with `~` for home.
+        #[qinvokable]
+        #[cxx_name = "settingsPath"]
+        fn settings_path(self: &AppSettings) -> QString;
 
         /// Switch theme by name ("omarchy" follows the system).
         #[qinvokable]
@@ -90,6 +99,9 @@ pub struct AppSettingsRust {
     font_family: QString,
     font_size: i32,
     opacity: f64,
+    font_size_min: i32,
+    font_size_max: i32,
+    opacity_min: f64,
     settings: Settings,
     palette: Palette,
     path: PathBuf,
@@ -111,6 +123,9 @@ impl Default for AppSettingsRust {
             font_family: QString::default(),
             font_size: 0,
             opacity: 0.0,
+            font_size_min: i32::try_from(settings::FONT_SIZE_MIN).unwrap_or(0),
+            font_size_max: i32::try_from(settings::FONT_SIZE_MAX).unwrap_or(i32::MAX),
+            opacity_min: settings::OPACITY_MIN,
             settings: Settings::default(),
             palette: Palette::builtin(),
             path,
@@ -136,19 +151,30 @@ impl AppSettingsRust {
 impl qobject::AppSettings {
     /// Current palette as a map keyed by QML color property names.
     pub fn colors(&self) -> QMap<QMapPair_QString_QVariant> {
-        let mut map = QMap::<QMapPair_QString_QVariant>::default();
-        for (key, value) in self.palette.qml_entries() {
-            map.insert(QString::from(key), QVariant::from(&QString::from(value)));
-        }
-        map
+        palette_map(&self.palette)
     }
 
-    /// "omarchy" (follow the active theme) followed by installed themes.
-    pub fn theme_names(&self) -> QStringList {
-        std::iter::once(settings::FOLLOW_OMARCHY.to_string())
-            .chain(settings::available_themes(&self.roots))
-            .map(|name| QString::from(&name))
-            .collect()
+    /// Theme picker cards, "Follow Omarchy" first.
+    pub fn theme_choices(&self) -> QList<QVariant> {
+        let mut list = QList::<QVariant>::default();
+        for choice in settings::theme_choices(&self.roots) {
+            let mut card = QMap::<QMapPair_QString_QVariant>::default();
+            insert_str(&mut card, "name", &choice.name);
+            insert_str(&mut card, "label", &choice.label);
+            insert_str(&mut card, "detail", choice.detail.as_deref().unwrap_or(""));
+            card.insert(
+                QString::from("colors"),
+                QVariant::from(&palette_map(&choice.palette)),
+            );
+            list.append(QVariant::from(&card));
+        }
+        list
+    }
+
+    /// Settings file location for display, with `~` for home.
+    pub fn settings_path(&self) -> QString {
+        let home = PathBuf::from(std::env::var_os("HOME").unwrap_or_default());
+        QString::from(&settings::display_path(&self.path, &home))
     }
 
     /// Switch theme by name ("omarchy" follows the system).
@@ -208,4 +234,16 @@ impl qobject::AppSettings {
             self.as_mut().opacity_changed();
         }
     }
+}
+
+fn palette_map(palette: &Palette) -> QMap<QMapPair_QString_QVariant> {
+    let mut map = QMap::<QMapPair_QString_QVariant>::default();
+    for (key, value) in palette.qml_entries() {
+        insert_str(&mut map, key, value);
+    }
+    map
+}
+
+fn insert_str(map: &mut QMap<QMapPair_QString_QVariant>, key: &str, value: &str) {
+    map.insert(QString::from(key), QVariant::from(&QString::from(value)));
 }

@@ -289,3 +289,108 @@ fn theme_names_cannot_escape_the_theme_roots() {
         Palette::builtin()
     );
 }
+
+#[test]
+fn theme_label_title_cases_hyphenated_names() {
+    // Same rule as `omarchy theme current`, so the panel and the CLI agree.
+    assert_eq!(
+        settings::theme_label("catppuccin-latte"),
+        "Catppuccin Latte"
+    );
+    assert_eq!(settings::theme_label("tokyo-night"), "Tokyo Night");
+    assert_eq!(settings::theme_label("nord"), "Nord");
+    assert_eq!(settings::theme_label("retro-82"), "Retro 82");
+}
+
+fn state_with_current(colors: &str, name: Option<&str>) -> tempfile::TempDir {
+    let state = tempfile::tempdir().unwrap();
+    let theme = state.path().join("theme");
+    std::fs::create_dir_all(&theme).unwrap();
+    std::fs::write(theme.join("colors.toml"), colors).unwrap();
+    if let Some(name) = name {
+        std::fs::write(state.path().join("theme.name"), format!("{name}\n")).unwrap();
+    }
+    state
+}
+
+#[test]
+fn theme_choices_start_with_follow_omarchy_then_sorted_themes() {
+    let system = tempfile::tempdir().unwrap();
+    write_theme(system.path(), "tokyo-night", TOKYO_NIGHT);
+    write_theme(system.path(), "catppuccin-latte", LATTE);
+    let state = state_with_current(TOKYO_NIGHT, Some("tokyo-night"));
+    let roots = ThemeRoots {
+        current: state.path().join("theme"),
+        dirs: vec![system.path().to_path_buf()],
+    };
+
+    let choices = settings::theme_choices(&roots);
+    let names: Vec<_> = choices.iter().map(|c| c.name.as_str()).collect();
+    assert_eq!(
+        names,
+        [settings::FOLLOW_OMARCHY, "catppuccin-latte", "tokyo-night"]
+    );
+    let labels: Vec<_> = choices.iter().map(|c| c.label.as_str()).collect();
+    assert_eq!(
+        labels,
+        ["Follow Omarchy", "Catppuccin Latte", "Tokyo Night"]
+    );
+}
+
+#[test]
+fn follow_choice_shows_the_active_theme_and_its_palette() {
+    let state = state_with_current(LATTE, Some("catppuccin-latte"));
+    let roots = ThemeRoots {
+        current: state.path().join("theme"),
+        dirs: vec![],
+    };
+    let follow = &settings::theme_choices(&roots)[0];
+    assert_eq!(follow.detail.as_deref(), Some("Catppuccin Latte"));
+    assert_eq!(follow.palette.bg, "#eff1f5");
+}
+
+#[test]
+fn follow_choice_without_omarchy_state_uses_builtin() {
+    let empty = tempfile::tempdir().unwrap();
+    let roots = ThemeRoots {
+        current: empty.path().join("theme"),
+        dirs: vec![],
+    };
+    let choices = settings::theme_choices(&roots);
+    assert_eq!(choices.len(), 1);
+    assert_eq!(choices[0].detail, None);
+    assert_eq!(choices[0].palette, Palette::builtin());
+}
+
+#[test]
+fn each_theme_choice_carries_its_own_palette() {
+    // The cards preview every theme, not the one currently applied.
+    let system = tempfile::tempdir().unwrap();
+    write_theme(system.path(), "catppuccin-latte", LATTE);
+    let state = state_with_current(TOKYO_NIGHT, None);
+    let roots = ThemeRoots {
+        current: state.path().join("theme"),
+        dirs: vec![system.path().to_path_buf()],
+    };
+    let choices = settings::theme_choices(&roots);
+    assert_eq!(choices[1].palette.bg, "#eff1f5");
+    assert_eq!(choices[1].detail, None);
+}
+
+#[test]
+fn display_path_abbreviates_home() {
+    let home = Path::new("/home/u");
+    assert_eq!(
+        settings::display_path(Path::new("/home/u/.config/x/settings.toml"), home),
+        "~/.config/x/settings.toml"
+    );
+    // Prefix match is per path component, not per character.
+    assert_eq!(
+        settings::display_path(Path::new("/home/user2/settings.toml"), home),
+        "/home/user2/settings.toml"
+    );
+    assert_eq!(
+        settings::display_path(Path::new("/etc/settings.toml"), Path::new("")),
+        "/etc/settings.toml"
+    );
+}

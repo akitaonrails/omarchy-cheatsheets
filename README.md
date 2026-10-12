@@ -67,9 +67,10 @@ o.window("^(omarchy-cheatsheets)$", { float = true, center = true, size = { 980,
 ## Appearance
 
 The window follows your active Omarchy theme out of the box. Click the gear
-next to the search field (or press `Ctrl+,`) to pick another theme, a text
-font, the font size, and the window opacity — changes apply immediately and
-are saved to `~/.config/omarchy-cheatsheets/settings.toml`. `Ctrl+=` /
+next to the search field (or press `Ctrl+,`) to open the appearance drawer:
+pick a theme from cards that preview its colors (arrow keys switch live), a
+text font, the font size, and the window opacity — changes apply immediately
+and are saved to `~/.config/omarchy-cheatsheets/settings.toml`. `Ctrl+=` /
 `Ctrl+-` / `Ctrl+0` grow, shrink, and reset the font size.
 
 The file can also be edited by hand; missing keys use the defaults:

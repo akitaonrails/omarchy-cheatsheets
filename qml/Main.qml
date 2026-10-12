@@ -107,139 +107,506 @@ ApplicationWindow {
         function onCurrent_sheetChanged() { window.refresh() }
     }
 
-    // Appearance settings. Every change is applied live and saved by Rust
+    // Small building blocks shared by the list and the appearance drawer.
+    component Keycap: Rectangle {
+        property string label
+        width: capText.implicitWidth + 16
+        height: window.px(26)
+        radius: 6
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: window.surface }
+            GradientStop { position: 1.0; color: window.bgDark }
+        }
+        border.color: window.muted
+        border.width: 1
+        Text {
+            id: capText
+            anchors.centerIn: parent
+            text: parent.label
+            color: window.fgBright
+            font.pixelSize: window.px(13)
+            font.family: window.iconFont
+        }
+    }
+
+    component SectionLabel: Text {
+        color: window.accent
+        font.pixelSize: window.px(11)
+        font.family: window.textFont
+        font.bold: true
+        font.letterSpacing: 1.6
+        font.capitalization: Font.AllUppercase
+    }
+
+    component KeyButton: Rectangle {
+        id: keyButton
+        property string glyph
+        signal activated()
+        implicitWidth: window.px(30)
+        implicitHeight: implicitWidth
+        radius: 6
+        opacity: enabled ? 1 : 0.35
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: keyArea.containsMouse ? window.selection : window.surface }
+            GradientStop { position: 1.0; color: window.bgDark }
+        }
+        border.color: keyArea.containsMouse ? window.accent : window.muted
+        border.width: 1
+        Text {
+            anchors.centerIn: parent
+            text: keyButton.glyph
+            color: window.fgBright
+            font.pixelSize: window.px(12)
+            font.family: window.iconFont
+        }
+        MouseArea {
+            id: keyArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: keyButton.activated()
+        }
+    }
+
+    // Appearance drawer. Every change is applied live and saved by Rust
     // (settings_bridge.rs); this panel only renders the current values.
     Popup {
         id: settingsPanel
-        x: window.width - width - 18
-        y: window.px(42) + 28
-        width: Math.max(320, window.px(340))
-        padding: 18
-        // Esc is handled by the window Shortcut so it never quits the app
-        // while the panel is open.
+        x: window.width - width
+        y: 0
+        width: Math.min(window.width - 40, Math.max(360, window.px(400)))
+        height: window.height
+        padding: 0
+        // Non-modal on purpose: a modal popup blocks the window Shortcuts,
+        // and Esc must close the drawer, not be swallowed.
+        modal: false
+        dim: true
         closePolicy: Popup.CloseOnPressOutside
-        // Keyboard-first like the rest of the app: Tab walks the controls,
-        // arrows change the focused one.
         focus: true
-        onOpened: themeBox.forceActiveFocus()
+        // Rebuilt on every open so a theme switched in Omarchy meanwhile
+        // shows its current colors on the "Follow Omarchy" card.
+        property var choices: []
+        onAboutToShow: choices = appSettings.themeChoices()
+        onOpened: themeGrid.forceActiveFocus()
         onClosed: searchInput.forceActiveFocus()
 
-        // Fusion controls take their colors from this palette.
-        palette.window: window.surface
-        palette.windowText: window.fg
-        palette.base: window.bg
-        palette.alternateBase: window.selection
-        palette.text: window.fgBright
-        palette.button: window.surface
-        palette.buttonText: window.fgBright
-        palette.highlight: window.accent
-        palette.highlightedText: window.bg
-        palette.mid: window.muted
-        palette.dark: window.bgDark
-        palette.light: window.selection
-        palette.placeholderText: window.dim
+        enter: Transition {
+            NumberAnimation { property: "x"; from: window.width; to: window.width - settingsPanel.width; duration: 160; easing.type: Easing.OutCubic }
+        }
+        exit: Transition {
+            NumberAnimation { property: "x"; to: window.width; duration: 120; easing.type: Easing.InCubic }
+        }
+
+        Overlay.modeless: Rectangle { color: Qt.rgba(0, 0, 0, 0.35) }
 
         background: Rectangle {
-            radius: 12
-            color: window.surface
-            border.color: window.muted
-            border.width: 1
+            color: window.bg
+            Rectangle { width: 1; height: parent.height; color: window.muted }
         }
 
         contentItem: ColumnLayout {
-            spacing: 14
+            spacing: window.px(14)
 
-            Text {
-                text: "Appearance"
-                color: window.fgBright
-                font.pixelSize: window.px(16)
-                font.family: window.textFont
-                font.bold: true
+            // Header
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 22
+                Layout.rightMargin: 18
+                spacing: 10
+                Text {
+                    text: ""
+                    font.family: window.iconFont
+                    font.pixelSize: window.px(16)
+                    color: window.accent
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: "Appearance"
+                    color: window.fgBright
+                    font.pixelSize: window.px(18)
+                    font.family: window.textFont
+                    font.bold: true
+                }
+                Rectangle {
+                    implicitWidth: window.px(28); implicitHeight: implicitWidth; radius: width / 2
+                    color: closeArea.containsMouse ? window.surface : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: ""
+                        font.family: window.iconFont
+                        font.pixelSize: window.px(12)
+                        color: closeArea.containsMouse ? window.fgBright : window.dim
+                    }
+                    MouseArea {
+                        id: closeArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: settingsPanel.close()
+                    }
+                }
             }
 
-            Text {
+            // Live preview: a real row rendered with the current choices.
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.leftMargin: 18
+                Layout.rightMargin: 18
+                implicitHeight: window.px(58)
+                radius: 10
+                color: window.surface
+                border.color: window.muted
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
+                    spacing: 12
+                    Row {
+                        spacing: 5
+                        Keycap { label: "Space" }
+                        Keycap { label: "s" }
+                        Keycap { label: "g" }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Grep in project"
+                        color: window.fg
+                        font.pixelSize: window.px(14)
+                        font.family: window.textFont
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+
+            // Text: font family + size
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                Layout.leftMargin: 22
+                Layout.rightMargin: 22
+                spacing: 8
+                SectionLabel { text: "Text" }
+
+                ComboBox {
+                    id: fontBox
+                    Layout.fillWidth: true
+                    implicitHeight: window.px(36)
+                    textRole: "text"
+                    valueRole: "value"
+                    model: [{ value: "", text: "System default" }].concat(
+                        Qt.fontFamilies().map(family => ({ value: family, text: family })))
+                    currentIndex: Math.max(0, indexOfValue(appSettings.font_family))
+                    onActivated: appSettings.applyFontFamily(currentValue)
+
+                    background: Rectangle {
+                        radius: height / 2
+                        color: window.surface
+                        border.color: fontBox.activeFocus || fontBox.popup.visible ? window.accent : window.muted
+                        border.width: fontBox.activeFocus ? 2 : 1
+                    }
+                    contentItem: Text {
+                        leftPadding: 16
+                        rightPadding: 8
+                        text: fontBox.displayText
+                        color: window.fgBright
+                        font.pixelSize: window.px(13)
+                        font.family: fontBox.currentValue || Qt.application.font.family
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+                    indicator: Text {
+                        x: fontBox.width - width - 16
+                        y: (fontBox.height - height) / 2
+                        text: ""
+                        font.family: window.iconFont
+                        font.pixelSize: window.px(10)
+                        color: window.dim
+                    }
+                    delegate: ItemDelegate {
+                        required property var modelData
+                        required property int index
+                        width: fontBox.width - 8
+                        height: window.px(30)
+                        highlighted: fontBox.highlightedIndex === index
+                        contentItem: Text {
+                            text: modelData.text
+                            color: highlighted ? window.fgBright : window.fg
+                            font.pixelSize: window.px(13)
+                            // Each family previews itself.
+                            font.family: modelData.value || Qt.application.font.family
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        background: Rectangle {
+                            radius: 6
+                            color: highlighted ? window.selection : "transparent"
+                        }
+                    }
+                    popup: Popup {
+                        y: fontBox.height + 4
+                        width: fontBox.width
+                        height: Math.min(contentItem.implicitHeight + 8, window.px(280))
+                        padding: 4
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: contentHeight
+                            model: fontBox.popup.visible ? fontBox.delegateModel : null
+                            currentIndex: fontBox.highlightedIndex
+                            ScrollIndicator.vertical: ScrollIndicator {}
+                        }
+                        background: Rectangle {
+                            radius: 10
+                            color: window.surface
+                            border.color: window.muted
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Size"
+                        color: window.fg
+                        font.pixelSize: window.px(13)
+                        font.family: window.textFont
+                    }
+                    KeyButton {
+                        glyph: ""
+                        enabled: appSettings.font_size > appSettings.font_size_min
+                        onActivated: appSettings.applyFontSize(appSettings.font_size - 1)
+                    }
+                    Text {
+                        Layout.preferredWidth: window.px(54)
+                        horizontalAlignment: Text.AlignHCenter
+                        text: appSettings.font_size + " px"
+                        color: window.fgBright
+                        font.pixelSize: window.px(13)
+                        font.family: window.textFont
+                    }
+                    KeyButton {
+                        glyph: ""
+                        enabled: appSettings.font_size < appSettings.font_size_max
+                        onActivated: appSettings.applyFontSize(appSettings.font_size + 1)
+                    }
+                }
+            }
+
+            // Window: opacity
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                Layout.leftMargin: 22
+                Layout.rightMargin: 22
+                spacing: 4
+                SectionLabel { text: "Window" }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+                    Text {
+                        text: "Opacity"
+                        color: window.fg
+                        font.pixelSize: window.px(13)
+                        font.family: window.textFont
+                    }
+                    Slider {
+                        id: opacitySlider
+                        Layout.fillWidth: true
+                        from: Math.round(appSettings.opacity_min * 100)
+                        to: 100
+                        stepSize: 1
+                        value: Math.round(appSettings.opacity * 100)
+                        onMoved: appSettings.applyOpacity(value / 100)
+                        background: Rectangle {
+                            x: opacitySlider.leftPadding
+                            y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
+                            width: opacitySlider.availableWidth
+                            height: 4
+                            radius: 2
+                            color: window.surface
+                            Rectangle {
+                                width: opacitySlider.visualPosition * parent.width
+                                height: parent.height
+                                radius: 2
+                                color: window.accent
+                            }
+                        }
+                        handle: Rectangle {
+                            x: opacitySlider.leftPadding + opacitySlider.visualPosition * (opacitySlider.availableWidth - width)
+                            y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
+                            width: window.px(16)
+                            height: width
+                            radius: width / 2
+                            color: opacitySlider.pressed ? window.fgBright : window.accent
+                            border.color: window.bg
+                            border.width: 2
+                        }
+                    }
+                    Text {
+                        Layout.preferredWidth: window.px(40)
+                        horizontalAlignment: Text.AlignRight
+                        text: Math.round(appSettings.opacity * 100) + "%"
+                        color: window.fgBright
+                        font.pixelSize: window.px(13)
+                        font.family: window.textFont
+                    }
+                }
+            }
+
+            // Theme cards: each previews its own palette; arrows switch live.
+            SectionLabel {
+                Layout.leftMargin: 22
+                Layout.topMargin: 4
                 text: "Theme"
-                color: window.dim
-                font.pixelSize: window.px(12)
-                font.family: window.textFont
             }
-            ComboBox {
-                id: themeBox
+            GridView {
+                id: themeGrid
                 Layout.fillWidth: true
-                textRole: "text"
-                valueRole: "value"
-                model: appSettings.themeNames().map(name => ({
-                    value: name,
-                    text: name === "omarchy" ? "Omarchy (follow system)" : name
-                }))
-                currentIndex: Math.max(0, indexOfValue(appSettings.theme))
-                onActivated: appSettings.applyTheme(currentValue)
+                Layout.fillHeight: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                keyNavigationEnabled: true
+                cellWidth: Math.floor(width / 3)
+                cellHeight: window.px(72)
+                model: settingsPanel.choices
+                currentIndex: Math.max(0, settingsPanel.choices.findIndex(c => c.name === appSettings.theme))
+                onCurrentIndexChanged: {
+                    const choice = settingsPanel.choices[currentIndex]
+                    if (activeFocus && choice && choice.name !== appSettings.theme)
+                        appSettings.applyTheme(choice.name)
+                }
+                ScrollIndicator.vertical: ScrollIndicator {}
+
+                delegate: Item {
+                    id: card
+                    required property var modelData
+                    required property int index
+                    readonly property var c: modelData.colors
+                    readonly property bool selected: modelData.name === appSettings.theme
+                    width: themeGrid.cellWidth
+                    height: themeGrid.cellHeight
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        radius: 10
+                        color: card.c.bg
+                        border.width: card.selected ? 2 : 1
+                        border.color: card.selected ? window.accent
+                                    : (cardArea.containsMouse ? window.dim : card.c.muted)
+
+                        Column {
+                            anchors.fill: parent
+                            anchors.margins: 9
+                            spacing: 5
+                            Row {
+                                spacing: 4
+                                Repeater {
+                                    model: [card.c.accent, card.c.cyan, card.c.fg, card.c.selection]
+                                    delegate: Rectangle {
+                                        required property string modelData
+                                        width: window.px(11)
+                                        height: width
+                                        radius: width / 2
+                                        color: modelData
+                                    }
+                                }
+                            }
+                            Text {
+                                width: parent.width
+                                text: card.modelData.label
+                                color: card.c.fgBright
+                                font.pixelSize: window.px(11)
+                                font.family: window.textFont
+                                font.bold: true
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                width: parent.width
+                                visible: text.length > 0
+                                text: card.modelData.detail
+                                color: card.c.dim
+                                font.pixelSize: window.px(10)
+                                font.family: window.textFont
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        Text {
+                            visible: card.selected
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: 8
+                            text: ""
+                            font.family: window.iconFont
+                            font.pixelSize: window.px(11)
+                            color: card.c.accent
+                        }
+
+                        MouseArea {
+                            id: cardArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: appSettings.applyTheme(card.modelData.name)
+                        }
+                    }
+                }
             }
 
-            Text {
-                text: "Font"
-                color: window.dim
-                font.pixelSize: window.px(12)
-                font.family: window.textFont
-            }
-            ComboBox {
-                id: fontBox
-                Layout.fillWidth: true
-                textRole: "text"
-                valueRole: "value"
-                model: [{ value: "", text: "System default" }].concat(
-                    Qt.fontFamilies().map(family => ({ value: family, text: family })))
-                currentIndex: Math.max(0, indexOfValue(appSettings.font_family))
-                onActivated: appSettings.applyFontFamily(currentValue)
-            }
-
+            // Footer: where it is saved + reset
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: window.surface }
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 12
+                Layout.leftMargin: 22
+                Layout.rightMargin: 18
+                Layout.bottomMargin: 16
+                spacing: 10
                 Text {
                     Layout.fillWidth: true
-                    text: "Font size"
+                    text: "Saved to " + appSettings.settingsPath()
                     color: window.dim
-                    font.pixelSize: window.px(12)
+                    font.pixelSize: window.px(10)
                     font.family: window.textFont
+                    elide: Text.ElideMiddle
                 }
-                SpinBox {
-                    from: 10
-                    to: 24
-                    value: appSettings.font_size
-                    onValueModified: appSettings.applyFontSize(value)
+                Rectangle {
+                    implicitWidth: resetRow.implicitWidth + 24
+                    implicitHeight: window.px(28)
+                    radius: height / 2
+                    color: resetArea.containsMouse ? window.surface : "transparent"
+                    border.color: resetArea.containsMouse ? window.accent : window.muted
+                    Row {
+                        id: resetRow
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Text {
+                            text: ""
+                            font.family: window.iconFont
+                            font.pixelSize: window.px(11)
+                            color: window.fg
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: "Reset"
+                            color: window.fg
+                            font.pixelSize: window.px(12)
+                            font.family: window.textFont
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    MouseArea {
+                        id: resetArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: appSettings.reset()
+                    }
                 }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 12
-                Text {
-                    text: "Opacity"
-                    color: window.dim
-                    font.pixelSize: window.px(12)
-                    font.family: window.textFont
-                }
-                Slider {
-                    Layout.fillWidth: true
-                    from: 50
-                    to: 100
-                    stepSize: 1
-                    value: Math.round(appSettings.opacity * 100)
-                    onMoved: appSettings.applyOpacity(value / 100)
-                }
-                Text {
-                    text: Math.round(appSettings.opacity * 100) + "%"
-                    color: window.fg
-                    font.pixelSize: window.px(12)
-                    font.family: window.textFont
-                }
-            }
-
-            Button {
-                Layout.alignment: Qt.AlignRight
-                text: "Reset to defaults"
-                onClicked: appSettings.reset()
             }
         }
     }
@@ -489,25 +856,9 @@ ApplicationWindow {
                                 spacing: 5
                                 Repeater {
                                     model: modelData.keys
-                                    delegate: Rectangle {
+                                    delegate: Keycap {
                                         required property string modelData
-                                        width: keyText.implicitWidth + 16
-                                        height: window.px(26)
-                                        radius: 6
-                                        gradient: Gradient {
-                                            GradientStop { position: 0.0; color: window.surface }
-                                            GradientStop { position: 1.0; color: window.bgDark }
-                                        }
-                                        border.color: window.muted
-                                        border.width: 1
-                                        Text {
-                                            id: keyText
-                                            anchors.centerIn: parent
-                                            text: modelData
-                                            color: window.fgBright
-                                            font.pixelSize: window.px(13)
-                                            font.family: window.iconFont
-                                        }
+                                        label: modelData
                                     }
                                 }
                             }

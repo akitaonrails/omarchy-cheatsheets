@@ -306,3 +306,62 @@ fn read_palette(theme_dir: &Path) -> Option<Palette> {
         }
     }
 }
+
+/// One card in the theme picker.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ThemeChoice {
+    /// Value stored in `settings.toml` (`theme`).
+    pub name: String,
+    /// Human name, e.g. "Catppuccin Latte".
+    pub label: String,
+    /// Extra line under the label: the active theme for "Follow Omarchy".
+    pub detail: Option<String>,
+    /// Colors the card previews.
+    pub palette: Palette,
+}
+
+/// Title-case a theme directory name ("tokyo-night" → "Tokyo Night"), the
+/// same rule `omarchy theme current` uses.
+pub fn theme_label(name: &str) -> String {
+    name.split('-')
+        .filter(|word| !word.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            chars.next().map_or_else(String::new, |first| {
+                first.to_uppercase().chain(chars).collect()
+            })
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+/// "Follow Omarchy" first, then every installed theme with its own palette.
+pub fn theme_choices(roots: &ThemeRoots) -> Vec<ThemeChoice> {
+    let active = fs::read_to_string(roots.current.with_file_name("theme.name"))
+        .ok()
+        .map(|name| name.trim().to_string())
+        .filter(|name| !name.is_empty());
+    let follow = ThemeChoice {
+        name: FOLLOW_OMARCHY.to_string(),
+        label: "Follow Omarchy".to_string(),
+        detail: active.as_deref().map(theme_label),
+        palette: read_palette(&roots.current).unwrap_or_else(Palette::builtin),
+    };
+    let installed = available_themes(roots).into_iter().map(|name| ThemeChoice {
+        label: theme_label(&name),
+        detail: None,
+        palette: resolve_palette(&name, roots),
+        name,
+    });
+    std::iter::once(follow).chain(installed).collect()
+}
+
+/// `path` with the home directory shown as `~`, for the panel footer.
+pub fn display_path(path: &Path, home: &Path) -> String {
+    if home.is_absolute()
+        && let Ok(rest) = path.strip_prefix(home)
+    {
+        return Path::new("~").join(rest).display().to_string();
+    }
+    path.display().to_string()
+}

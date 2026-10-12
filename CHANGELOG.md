@@ -14,9 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   clamped. The name is reserved: the overlay loader skips it.
 - Palettes come from Omarchy theme `colors.toml` files (stock and
   `~/.config/omarchy/themes`); missing colors fall back to Tokyo Night.
-- Appearance panel (gear button or `Ctrl+,`): theme, text font, font size and
-  window opacity, applied live and saved to `settings.toml`. `Ctrl+=` /
-  `Ctrl+-` / `Ctrl+0` change the font size; the whole layout scales with it.
+- Appearance drawer (gear button or `Ctrl+,`): theme cards previewing each
+  theme's own colors (arrow keys switch live), a font picker that renders
+  each family in itself, a live preview row, a keycap-style size stepper and
+  an opacity slider, all in the app's palette. Changes apply live and are
+  saved to `settings.toml`; the footer shows where. `Ctrl+=` / `Ctrl+-` /
+  `Ctrl+0` change the font size; the whole layout scales with it.
 
 ### Changed
 
