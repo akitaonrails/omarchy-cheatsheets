@@ -266,7 +266,7 @@ ApplicationWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: searchInput.text.trim().length > 0
                         ? "No bindings match — try fewer words"
-                        : "Type what the shortcut does, e.g. \"split pane\" or \"quit\""
+                        : "Type what it does, its section or app — e.g. \"split pane\", \"copy mode\", \"tmux quit\""
                     color: window.dim
                     font.pixelSize: 14
                 }

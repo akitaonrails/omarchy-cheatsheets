@@ -28,3 +28,21 @@ fn ranked_hits_span_multiple_sheets() {
     );
     assert!(hits.windows(2).all(|w| w[0].score >= w[1].score));
 }
+
+#[test]
+fn section_name_finds_its_real_entries() {
+    let sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
+    let hits = search::rank(&sheets, "copy mode vi", 50);
+    assert!(
+        hits.iter()
+            .any(|h| h.sheet == "tmux" && h.section == "Copy mode (vi)"),
+        "tmux copy-mode section missing from {hits:?}"
+    );
+}
+
+#[test]
+fn app_name_narrows_to_that_app() {
+    let sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
+    let hits = search::rank(&sheets, "lazygit quit", 50);
+    assert_eq!(hits.first().map(|h| h.sheet.as_str()), Some("lazygit"));
+}

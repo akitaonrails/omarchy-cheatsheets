@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser. An older binary without `--search` falls back to the browser.
 - Search matches query words in any order ("pane split" finds "Split pane");
   every word must still match. Queries that matched before still match.
+- Search also matches an entry's section and app name ("copy mode",
+  "tmux quit"), in both windows. Entries whose own text matches rank first.
 
 ## [0.1.1] - 2026-10-12
 

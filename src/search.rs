@@ -1,7 +1,7 @@
 //! Fuzzy-lite search over cheatsheets: case-insensitive subsequence matching
 //! with a small scoring model so the best matches sort first.
 
-use crate::sheet::{Entry, Sheet};
+use crate::sheet::{Entry, Section, Sheet};
 
 /// Score `text` against `query`: `Some(score)` when every whitespace-separated
 /// query word appears as an in-order subsequence (case-insensitive), in any
@@ -65,6 +65,23 @@ pub struct ScoredSection {
     pub entries: Vec<ScoredEntry>,
 }
 
+/// Score one entry in context: its own keys/description/tags first, then
+/// with its section and app names appended, so "copy mode" or "tmux quit"
+/// find entries whose own text never says so. Context-only matches score at
+/// half so that "pane" lists "Split pane" before every other row in Panes.
+fn entry_score(query: &str, sheet: &Sheet, section: &Section, entry: &Entry) -> Option<u32> {
+    let own = entry.haystack();
+    score(query, &own).or_else(|| {
+        let context = format!(
+            "{own} {} {} {}",
+            section.name,
+            sheet.name,
+            sheet.display_title()
+        );
+        score(query, &context).map(|score| score / 2)
+    })
+}
+
 /// Filter and rank every entry across `sheets`. Empty query returns all
 /// entries in their curated order with score 0.
 pub fn filter(sheets: &[Sheet], query: &str) -> Vec<ScoredSection> {
@@ -82,7 +99,7 @@ pub fn filter(sheets: &[Sheet], query: &str) -> Vec<ScoredSection> {
                             score: 0,
                         });
                     }
-                    score(query, &entry.haystack()).map(|score| ScoredEntry {
+                    entry_score(query, sheet, section, entry).map(|score| ScoredEntry {
                         entry: entry.clone(),
                         score,
                     })
@@ -133,7 +150,7 @@ pub fn rank(sheets: &[Sheet], query: &str, limit: usize) -> Vec<Hit> {
         .flat_map(|sheet| {
             sheet.sections.iter().flat_map(move |section| {
                 section.entries.iter().filter_map(move |entry| {
-                    score(query, &entry.haystack()).map(|score| Hit {
+                    entry_score(query, sheet, section, entry).map(|score| Hit {
                         sheet: sheet.name.clone(),
                         sheet_title: sheet.display_title().to_string(),
                         icon: sheet.icon.clone(),
@@ -326,5 +343,50 @@ mod tests {
         assert_eq!(hits[0].icon.as_deref(), Some("\u{ebc8}"));
         assert_eq!(hits[0].section, "Panes");
         assert!(hits[0].score > 0);
+    }
+
+    #[test]
+    fn rank_matches_section_name() {
+        let sheets = [
+            sheet("tmux", "Copy mode", &["Begin selection"]),
+            sheet("tmux", "Panes", &["Zoom"]),
+        ];
+        assert_eq!(
+            descriptions(&rank(&sheets, "copy mode", 10)),
+            [("tmux", "Begin selection")]
+        );
+    }
+
+    #[test]
+    fn rank_matches_app_name_and_title() {
+        let mut nvim = sheet("nvim", "Basics", &["Quit"]);
+        nvim.title = Some("Neovim (LazyVim)".into());
+        let sheets = [nvim, sheet("tmux", "Basics", &["Quit"])];
+        assert_eq!(
+            descriptions(&rank(&sheets, "tmux quit", 10)),
+            [("tmux", "Quit")]
+        );
+        assert_eq!(
+            descriptions(&rank(&sheets, "lazyvim quit", 10)),
+            [("nvim", "Quit")]
+        );
+    }
+
+    #[test]
+    fn own_text_match_outranks_section_only_match() {
+        let sheets = [sheet("tmux", "Panes", &["Zoom", "Split pane"])];
+        assert_eq!(
+            descriptions(&rank(&sheets, "pane", 10)),
+            [("tmux", "Split pane"), ("tmux", "Zoom")]
+        );
+    }
+
+    #[test]
+    fn filter_matches_section_name_too() {
+        // The browser filter shares the matcher with quick search.
+        let sheets = [sheet("tmux", "Copy mode", &["Begin selection"])];
+        let hits = filter(&sheets, "copy mode");
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].entries[0].entry.description, "Begin selection");
     }
 }
