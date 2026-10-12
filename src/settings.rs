@@ -23,6 +23,9 @@ pub const OPACITY_MAX: f64 = 1.0;
 /// Slight translucency so Hyprland's blur bleeds through.
 pub const OPACITY_DEFAULT: f64 = 0.96;
 
+/// Palette file every Omarchy theme directory ships.
+const COLORS_FILE: &str = "colors.toml";
+
 /// Errors while reading or writing the settings file.
 #[derive(Debug, Error)]
 #[non_exhaustive]
@@ -134,4 +137,172 @@ pub fn save_settings(path: &Path, settings: &Settings) -> Result<(), SettingsErr
     let tmp = path.with_extension("toml.tmp");
     fs::write(&tmp, body).map_err(io_err)?;
     fs::rename(&tmp, path).map_err(io_err)
+}
+
+/// Window colors, as `#rrggbb` strings QML converts to `color`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Palette {
+    /// Window background (`background`).
+    pub bg: String,
+    /// Keycap gradient bottom (`dark_background`).
+    pub bg_dark: String,
+    /// Search field, keycaps, dividers (`lighter_background`).
+    pub surface: String,
+    /// Selected/hovered row (`selection`).
+    pub selection: String,
+    /// Borders, empty-state icon (`muted`).
+    pub muted: String,
+    /// Body text (`foreground`).
+    pub fg: String,
+    /// Emphasized text, keycap labels (`bright_foreground`).
+    pub fg_bright: String,
+    /// Hints, placeholders, counters (`dark_foreground`).
+    pub dim: String,
+    /// Focus ring, section headers, active sidebar item (`accent`).
+    pub accent: String,
+    /// Secondary accent (`cyan`).
+    pub cyan: String,
+}
+
+impl Palette {
+    /// Tokyo Night, the stock Omarchy theme and the look before theming.
+    pub fn builtin() -> Self {
+        Self {
+            bg: "#1a1b26".into(),
+            bg_dark: "#13141c".into(),
+            surface: "#24283b".into(),
+            selection: "#292e42".into(),
+            muted: "#414868".into(),
+            fg: "#a9b1d6".into(),
+            fg_bright: "#c0caf5".into(),
+            dim: "#565f89".into(),
+            accent: "#7aa2f7".into(),
+            cyan: "#449dab".into(),
+        }
+    }
+
+    /// Map an Omarchy theme `colors.toml`; missing or malformed colors keep
+    /// the builtin value so a partial custom theme still renders.
+    pub fn from_colors_toml(source: &str) -> Result<Self, toml::de::Error> {
+        let table: toml::Table = toml::from_str(source)?;
+        let pick = |key: &str, fallback: String| {
+            table
+                .get(key)
+                .and_then(toml::Value::as_str)
+                .filter(|v| is_hex_color(v))
+                .map_or(fallback, str::to_string)
+        };
+        let b = Self::builtin();
+        Ok(Self {
+            bg: pick("background", b.bg),
+            bg_dark: pick("dark_background", b.bg_dark),
+            surface: pick("lighter_background", b.surface),
+            selection: pick("selection", b.selection),
+            muted: pick("muted", b.muted),
+            fg: pick("foreground", b.fg),
+            fg_bright: pick("bright_foreground", b.fg_bright),
+            dim: pick("dark_foreground", b.dim),
+            accent: pick("accent", b.accent),
+            cyan: pick("cyan", b.cyan),
+        })
+    }
+
+    /// Colors keyed by the property names Main.qml binds to.
+    pub fn qml_entries(&self) -> [(&'static str, &str); 10] {
+        [
+            ("bg", &self.bg),
+            ("bgDark", &self.bg_dark),
+            ("surface", &self.surface),
+            ("selection", &self.selection),
+            ("muted", &self.muted),
+            ("fg", &self.fg),
+            ("fgBright", &self.fg_bright),
+            ("dim", &self.dim),
+            ("accent", &self.accent),
+            ("cyan", &self.cyan),
+        ]
+    }
+}
+
+fn is_hex_color(value: &str) -> bool {
+    value
+        .strip_prefix('#')
+        .is_some_and(|hex| hex.len() == 6 && hex.chars().all(|c| c.is_ascii_hexdigit()))
+}
+
+/// Where Omarchy themes live; injected so tests never read the real system.
+#[derive(Debug, Clone)]
+pub struct ThemeRoots {
+    /// The active theme directory (holds `colors.toml`).
+    pub current: PathBuf,
+    /// Theme collections searched in order; earlier roots win.
+    pub dirs: Vec<PathBuf>,
+}
+
+impl ThemeRoots {
+    /// Omarchy's real locations: active theme state, user themes, stock themes.
+    pub fn system() -> Self {
+        let state_home = std::env::var_os("XDG_STATE_HOME")
+            .filter(|v| !v.is_empty())
+            .map_or_else(
+                || PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".local/state"),
+                PathBuf::from,
+            );
+        Self {
+            current: state_home.join("omarchy/current/theme"),
+            dirs: vec![
+                load::default_config_home().join("omarchy/themes"),
+                PathBuf::from("/usr/share/omarchy/themes"),
+            ],
+        }
+    }
+}
+
+/// Theme names found under `roots.dirs` that ship a `colors.toml`, sorted.
+pub fn available_themes(roots: &ThemeRoots) -> Vec<String> {
+    let mut names: Vec<String> = roots
+        .dirs
+        .iter()
+        .filter_map(|dir| fs::read_dir(dir).ok())
+        .flatten()
+        .filter_map(Result::ok)
+        .filter(|e| e.path().join(COLORS_FILE).is_file())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .collect();
+    names.sort();
+    names.dedup();
+    names
+}
+
+/// Palette for `theme`: the named theme, else the active Omarchy theme,
+/// else the builtin — the window always gets colors.
+pub fn resolve_palette(theme: &str, roots: &ThemeRoots) -> Palette {
+    let named = (theme != FOLLOW_OMARCHY && is_plain_name(theme))
+        .then(|| roots.dirs.iter().map(|dir| dir.join(theme)))
+        .into_iter()
+        .flatten();
+    named
+        .chain(std::iter::once(roots.current.clone()))
+        .find_map(|dir| read_palette(&dir))
+        .unwrap_or_else(Palette::builtin)
+}
+
+/// A theme name is one path component; anything else could escape the roots.
+fn is_plain_name(name: &str) -> bool {
+    let mut parts = Path::new(name).components();
+    matches!(
+        (parts.next(), parts.next()),
+        (Some(std::path::Component::Normal(_)), None)
+    )
+}
+
+fn read_palette(theme_dir: &Path) -> Option<Palette> {
+    let source = fs::read_to_string(theme_dir.join(COLORS_FILE)).ok()?;
+    match Palette::from_colors_toml(&source) {
+        Ok(palette) => Some(palette),
+        Err(err) => {
+            tracing::warn!("ignoring theme {}: {err}", theme_dir.display());
+            None
+        }
+    }
 }

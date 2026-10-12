@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `~/.config/omarchy-cheatsheets/settings.toml` stores appearance settings
   (`theme`, `font_family`, `font_size`, `opacity`); out-of-range values are
   clamped. The name is reserved: the overlay loader skips it.
+- Palettes come from Omarchy theme `colors.toml` files (stock and
+  `~/.config/omarchy/themes`); missing colors fall back to Tokyo Night.
 
 ## [0.1.1] - 2026-10-12
 
