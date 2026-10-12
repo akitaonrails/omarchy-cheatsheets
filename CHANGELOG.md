@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-12
+
 ### Added
 
 - Live binding resolution: tmux entries are verified against a probe server
