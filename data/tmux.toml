@@ -1,5 +1,5 @@
 name = "tmux"
-title = "tmux (prefix: Ctrl-Space)"
+title = "tmux (prefix: {prefix})"
 icon = "\uf489"
 command = "tmux"
 
@@ -7,29 +7,33 @@ command = "tmux"
 name = "Prefix & basics"
 
 [[sections.entries]]
-keys = ["Ctrl", "Space"]
-description = "Prefix key (fallback: Ctrl-b)"
+keys = ["prefix"]
+description = "Prefix key"
 tags = ["daily"]
 
 [[sections.entries]]
 keys = ["prefix", "?"]
 description = "List all key bindings"
 tags = ["daily"]
+probe = { command = "list-keys" }
 
 [[sections.entries]]
 keys = ["prefix", "q"]
 description = "Reload tmux.conf"
 tags = []
+probe = { command = "source-file" }
 
 [[sections.entries]]
 keys = ["prefix", ":"]
 description = "Command prompt"
 tags = []
+probe = { command = "command-prompt" }
 
 [[sections.entries]]
 keys = ["prefix", "d"]
 description = "Detach from session"
 tags = ["daily"]
+probe = { command = "detach-client" }
 
 [[sections]]
 name = "Panes"
@@ -38,51 +42,61 @@ name = "Panes"
 keys = ["Alt", "Enter"]
 description = "Split pane vertically (no prefix)"
 tags = ["daily"]
+probe = { command = "split-window -v", table = "root" }
 
 [[sections.entries]]
 keys = ["Alt", "Shift", "Enter"]
 description = "Split pane horizontally (no prefix)"
 tags = ["daily"]
+probe = { command = "split-window -h", table = "root" }
 
 [[sections.entries]]
 keys = ["prefix", "h"]
 description = "Split pane vertically"
 tags = []
+probe = { command = "split-window -v" }
 
 [[sections.entries]]
 keys = ["prefix", "v"]
 description = "Split pane horizontally"
 tags = []
+probe = { command = "split-window -h" }
 
 [[sections.entries]]
 keys = ["Ctrl", "Alt", "←/→/↑/↓"]
 description = "Move focus between panes (no prefix)"
 tags = ["daily"]
+probe = { command = "select-pane", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["Ctrl", "Alt", "Shift", "←/→/↑/↓"]
 description = "Resize pane by 5 cells (no prefix)"
 tags = ["daily"]
+probe = { command = "resize-pane", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "x"]
 description = "Kill current pane"
 tags = ["daily"]
+probe = { command = "kill-pane" }
 
 [[sections.entries]]
 keys = ["prefix", "z"]
 description = "Zoom pane (toggle fullscreen)"
 tags = ["daily"]
+probe = { command = "resize-pane -Z" }
 
 [[sections.entries]]
 keys = ["prefix", "{ / }"]
 description = "Swap pane with previous/next"
 tags = ["rare"]
+probe = { command = "swap-pane", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "Space"]
 description = "Cycle pane layouts"
 tags = ["rare"]
+probe = { command = "next-layout" }
 
 [[sections]]
 name = "Windows"
@@ -91,36 +105,43 @@ name = "Windows"
 keys = ["prefix", "c"]
 description = "New window (in current path)"
 tags = ["daily"]
+probe = { command = "new-window" }
 
 [[sections.entries]]
 keys = ["Alt", "1..9"]
 description = "Jump to window by number (no prefix)"
 tags = ["daily"]
+probe = { command = "select-window -t ", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["Alt", "←/→"]
 description = "Previous / next window (no prefix)"
 tags = ["daily"]
+probe = { command = "select-window -t -", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["Alt", "Shift", "←/→"]
 description = "Move window left / right (no prefix)"
 tags = []
+probe = { command = "swap-window", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "r"]
 description = "Rename current window"
 tags = []
+probe = { command = "rename-window" }
 
 [[sections.entries]]
 keys = ["prefix", "k"]
 description = "Kill current window"
 tags = []
+probe = { command = "kill-window" }
 
 [[sections.entries]]
 keys = ["prefix", "w"]
 description = "Window picker (choose-tree)"
 tags = ["rare"]
+probe = { command = "choose-tree" }
 
 [[sections]]
 name = "Sessions"
@@ -129,36 +150,37 @@ name = "Sessions"
 keys = ["prefix", "C"]
 description = "New session (in current path)"
 tags = ["daily"]
+probe = { command = "new-session" }
 
 [[sections.entries]]
 keys = ["prefix", "R"]
 description = "Rename current session"
 tags = []
+probe = { command = "rename-session" }
 
 [[sections.entries]]
 keys = ["prefix", "K"]
 description = "Kill current session"
 tags = []
+probe = { command = "kill-session" }
 
 [[sections.entries]]
 keys = ["prefix", "P / N"]
 description = "Switch to previous / next session"
 tags = []
+probe = { command = "switch-client", family = true }
 
 [[sections.entries]]
 keys = ["Alt", "↑/↓"]
 description = "Switch to previous / next session (no prefix)"
 tags = []
+probe = { command = "switch-client", table = "root", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "s"]
 description = "Session picker (choose-tree)"
 tags = ["daily"]
-
-[[sections.entries]]
-keys = ["prefix", "("]
-description = "Switch to previous session (stock)"
-tags = ["rare"]
+probe = { command = "choose-tree" }
 
 [[sections]]
 name = "Copy mode (vi)"
@@ -167,28 +189,34 @@ name = "Copy mode (vi)"
 keys = ["prefix", "["]
 description = "Enter copy mode (scroll back)"
 tags = ["daily"]
+probe = { command = "copy-mode" }
 
 [[sections.entries]]
 keys = ["v"]
 description = "Begin selection (in copy mode)"
 tags = ["daily"]
+probe = { command = "begin-selection", table = "copy-mode-vi" }
 
 [[sections.entries]]
 keys = ["y"]
 description = "Copy selection and exit (in copy mode)"
 tags = ["daily"]
+probe = { command = "copy-selection", table = "copy-mode-vi" }
 
 [[sections.entries]]
 keys = ["prefix", "]"]
 description = "Paste from buffer"
 tags = ["daily"]
+probe = { command = "paste-buffer" }
 
 [[sections.entries]]
 keys = ["q"]
 description = "Quit copy mode"
 tags = []
+probe = { command = "cancel", table = "copy-mode-vi" }
 
 [[sections.entries]]
 keys = ["/", "?"]
 description = "Search down / up (in copy mode)"
 tags = []
+probe = { command = "search", table = "copy-mode-vi", family = true }

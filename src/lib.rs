@@ -3,5 +3,6 @@
 pub mod bridge;
 pub mod cli;
 pub mod load;
+pub mod resolve;
 pub mod search;
 pub mod sheet;

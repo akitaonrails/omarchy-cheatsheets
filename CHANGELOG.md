@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Live binding resolution: tmux entries are verified against a probe server
+  running the user's `tmux.conf` (rewritten to real chords, dropped when
+  unbound); Herdr entries resolve from `--default-config` merged with the
+  user's `config.toml`. Prefix/leader keys in titles resolve from the user's
+  tmux/herdr/Neovim configs.
+- All-sheets view groups rows by app ("tmux · Panes") instead of unlabeled
+  per-row badges.
+- Omarchy shell bar widget (`omarchy plugin add`): launches the app, or offers
+  the AUR install when missing.
+- CONTRIBUTING.md with the "real bindings only" rule for new apps.
+
+### Fixed
+
+- Hyprland bindings no longer clash with stock Omarchy (tmux moved to
+  SUPER+ALT+T; SUPER+T is the stock float toggle).
+
+### Changed
+
+- tmux sheet shows both configured prefixes (`Ctrl+Space / Ctrl+b`).
+
 ## [0.1.0] - 2026-10-12
 
 ### Added

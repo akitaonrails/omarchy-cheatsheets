@@ -247,7 +247,7 @@ ApplicationWindow {
                     boundsBehavior: Flickable.StopAtBounds
                     model: []
 
-                    section.property: "section"
+                    section.property: "group"
                     section.criteria: ViewSection.FullString
                     section.delegate: Item {
                         required property string section
@@ -322,22 +322,6 @@ ApplicationWindow {
                                 color: window.fg
                                 font.pixelSize: 14
                                 elide: Text.ElideRight
-                            }
-
-                            Rectangle {
-                                visible: bridge.current_sheet < 0
-                                width: sheetBadgeText.implicitWidth + 14
-                                height: 20
-                                radius: 10
-                                color: Qt.rgba(window.accent.r, window.accent.g, window.accent.b, 0.14)
-                                Text {
-                                    id: sheetBadgeText
-                                    anchors.centerIn: parent
-                                    text: modelData.sheet
-                                    color: window.accent
-                                    font.pixelSize: 11
-                                    font.bold: true
-                                }
                             }
                         }
 

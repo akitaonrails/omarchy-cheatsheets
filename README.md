@@ -2,17 +2,34 @@
 
 Pretty, searchable cheatsheets for [Omarchy](https://omarchy.org/) Linux.
 A small Qt6/QML window backed by Rust (cxx-qt): launch it, start typing,
-the list narrows instantly. Ships curated sheets for **Neovim (LazyVim)**,
-**tmux**, **Herdr**, **Zellij**, **lazygit**, **lazydocker**, and **btop** —
-tools not installed on your system are hidden automatically.
+the list narrows instantly.
 
-<!-- screenshot -->
+![omarchy-cheatsheets](docs/screenshot.png)
+
+**The goal is to show the real bindings available on your machine, not a
+static cheatsheet like many others.** Sheets resolve against your actual
+configs at launch: tmux bindings are read from a probe of your live
+`tmux.conf` (overrides applied, unbound defaults dropped), Herdr bindings from
+your merged `config.toml`, and prefix/leader keys are always read from your
+setup. Tools with non-configurable keys (like btop) ship their documented
+defaults; anything else can be adjusted via TOML overlays.
+
+Ships curated sheets for **Neovim (LazyVim)**, **tmux**, **Herdr**,
+**Zellij**, **lazygit**, **lazydocker**, and **btop** — tools not installed
+on your system are hidden automatically.
 
 ## Install
 
 ```bash
 yay -S omarchy-cheatsheets-bin   # prebuilt binary (AUR)
 yay -S omarchy-cheatsheets       # build from source (AUR)
+```
+
+Omarchy shell users can also add the bar widget, which offers the AUR install
+when the app is missing and launches it when present:
+
+```bash
+omarchy plugin add https://github.com/akitaonrails/omarchy-cheatsheets.git --enable
 ```
 
 ## Usage
@@ -27,9 +44,11 @@ Suggested Hyprland bindings (`~/.config/hypr/bindings.lua`):
 
 ```lua
 o.bind("SUPER + N", "Neovim cheatsheet", { launch = "omarchy-cheatsheets --section nvim" })
-o.bind("SUPER + T", "Tmux cheatsheet", { launch = "omarchy-cheatsheets --section tmux" })
+o.bind("SUPER + ALT + T", "Tmux cheatsheet", { launch = "omarchy-cheatsheets --section tmux" })
 o.bind("SUPER + CTRL + SLASH", "Cheatsheets", { launch = "omarchy-cheatsheets" })
 ```
+
+(SUPER+T is stock Omarchy's float toggle — hence SUPER+ALT+T.)
 
 and a floating window rule (`~/.config/hypr/looknfeel.lua`):
 
@@ -71,9 +90,11 @@ cargo deny check
 ```
 
 Layout: `src/sheet.rs` (model), `src/load.rs` (embedded + overlay merge,
-availability probe), `src/search.rs` (scoring), `src/bridge.rs` (cxx-qt
-QObject), `qml/Main.qml` (all UI), `data/*.toml` (curated sheets).
-Rules and gates live in [AGENTS.md](AGENTS.md).
+availability probe, prefix resolution), `src/resolve.rs` (live binding
+resolution), `src/search.rs` (scoring), `src/bridge.rs` (cxx-qt QObject),
+`qml/Main.qml` (all UI), `data/*.toml` (curated sheets), `plugin/` (Omarchy
+shell bar widget). Rules and gates live in [AGENTS.md](AGENTS.md); adding a
+new app's sheet is documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release
 

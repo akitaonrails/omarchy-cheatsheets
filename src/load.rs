@@ -94,6 +94,118 @@ pub fn default_overlay_dir() -> PathBuf {
     PathBuf::from(home).join(".config/omarchy-cheatsheets")
 }
 
+/// Directory holding user configs (`$XDG_CONFIG_HOME` or `~/.config`).
+pub fn default_config_home() -> PathBuf {
+    default_overlay_dir()
+        .parent()
+        .map_or_else(|| PathBuf::from("."), Path::to_path_buf)
+}
+
+/// Substitute `{prefix}` in sheet titles with the key resolved from the
+/// user's actual config files. Sheets whose tool has no discoverable
+/// prefix fall back to their static title (template stripped).
+pub fn apply_dynamic_prefixes(sheets: &mut [Sheet], config_home: &Path) {
+    for sheet in sheets.iter_mut() {
+        let resolved = resolve_prefix(&sheet.name, config_home);
+        let title = sheet.title.take().unwrap_or_else(|| sheet.name.clone());
+        sheet.title = Some(render_title(&title, resolved.as_deref()));
+    }
+}
+
+fn render_title(template: &str, prefix: Option<&str>) -> String {
+    match prefix {
+        Some(p) => template.replace("{prefix}", p),
+        None => template
+            .replace(" (prefix: {prefix})", "")
+            .replace(", leader: {prefix})", ")")
+            .replace("{prefix}", "prefix"),
+    }
+}
+
+/// Resolve a tool's prefix/leader from the user's config. Returns a display
+/// string like `Ctrl+Space / Ctrl+b`.
+fn resolve_prefix(sheet: &str, config_home: &Path) -> Option<String> {
+    match sheet {
+        "tmux" => resolve_tmux_prefix(config_home),
+        "herdr" => resolve_herdr_prefix(config_home),
+        "nvim" => resolve_nvim_leader(config_home),
+        _ => None,
+    }
+}
+
+/// tmux chord notation (`C-Space`, `M-Enter`) to display form.
+fn tmux_chord(chord: &str) -> String {
+    crate::resolve::display_chord(chord).join("+")
+}
+
+fn resolve_tmux_prefix(config_home: &Path) -> Option<String> {
+    let conf = config_home.join("tmux/tmux.conf");
+    let conf = if conf.exists() {
+        conf
+    } else {
+        // Pre-XDG location
+        let home = std::env::var("HOME").ok()?;
+        PathBuf::from(home).join(".tmux.conf")
+    };
+    let source = fs::read_to_string(conf).ok()?;
+
+    let mut prefixes = Vec::new();
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("set -g prefix ") {
+            prefixes.push(tmux_chord(rest.trim()));
+        } else if let Some(rest) = line.strip_prefix("set -g prefix2 ") {
+            prefixes.push(tmux_chord(rest.trim()));
+        }
+    }
+    (!prefixes.is_empty()).then(|| prefixes.join(" / "))
+}
+
+fn resolve_herdr_prefix(config_home: &Path) -> Option<String> {
+    let conf = config_home.join("herdr/config.toml");
+    let source = fs::read_to_string(conf).ok()?;
+    let doc: toml::Value = toml::from_str(&source).ok()?;
+    let prefix = doc.get("keys")?.get("prefix")?.as_str()?;
+    Some(crate::resolve::display_chord(prefix).join("+"))
+}
+
+/// LazyVim reads `vim.g.mapleader`; default is Space. Scan the user's lua
+/// config for an override.
+fn resolve_nvim_leader(config_home: &Path) -> Option<String> {
+    let lua_dir = config_home.join("nvim/lua");
+    let source = read_lua_sources(&lua_dir)?;
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("vim.g.mapleader") {
+            let value = rest
+                .trim_start_matches(['=', ' ', '"'])
+                .trim_end_matches(['"', ' ']);
+            return Some(match value {
+                " " | "" => "Space".to_string(),
+                other => other.to_string(),
+            });
+        }
+    }
+    Some("Space".to_string())
+}
+
+fn read_lua_sources(dir: &Path) -> Option<String> {
+    let mut out = String::new();
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        for entry in fs::read_dir(dir).ok()?.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+            } else if path.extension().is_some_and(|ext| ext == "lua") {
+                out.push_str(&fs::read_to_string(path).unwrap_or_default());
+                out.push('\n');
+            }
+        }
+    }
+    (!out.is_empty()).then_some(out)
+}
+
 /// Load the embedded sheets with overlays from `overlay_dir` merged on top.
 ///
 /// A missing or unreadable overlay directory is not an error — embedded

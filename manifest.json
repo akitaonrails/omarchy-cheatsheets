@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "akitaonrails.cheatsheets",
+  "name": "Cheatsheets",
+  "version": "0.1.0",
+  "author": "AkitaOnRails",
+  "description": "Pretty, searchable cheatsheets for Neovim, tmux, Herdr and more — showing the real bindings on your machine, not static defaults.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "plugin/Cheatsheets.qml"
+  },
+  "barWidget": {
+    "displayName": "Cheatsheets",
+    "description": "Launch searchable cheatsheets for your tools",
+    "category": "System",
+    "allowMultiple": false
+  }
+}

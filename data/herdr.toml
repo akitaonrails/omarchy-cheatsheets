@@ -1,5 +1,5 @@
 name = "herdr"
-title = "Herdr (prefix: Ctrl-b)"
+title = "Herdr (prefix: {prefix})"
 icon = "\uf085"
 command = "herdr"
 
@@ -7,7 +7,7 @@ command = "herdr"
 name = "Prefix & basics"
 
 [[sections.entries]]
-keys = ["Ctrl", "b"]
+keys = ["prefix"]
 description = "Prefix key"
 tags = ["daily"]
 
@@ -15,26 +15,31 @@ tags = ["daily"]
 keys = ["prefix", "?"]
 description = "Help / keybindings"
 tags = ["daily"]
+probe = { action = "help" }
 
 [[sections.entries]]
 keys = ["prefix", "q"]
 description = "Reload config"
 tags = []
+probe = { action = "reload_config" }
 
 [[sections.entries]]
 keys = ["prefix", "d"]
 description = "Detach from session"
 tags = ["daily"]
+probe = { action = "detach" }
 
 [[sections.entries]]
 keys = ["prefix", "["]
 description = "Copy mode"
 tags = []
+probe = { action = "copy_mode" }
 
 [[sections.entries]]
 keys = ["prefix", "\\"]
 description = "Toggle sidebar"
 tags = ["daily"]
+probe = { action = "toggle_sidebar" }
 
 [[sections]]
 name = "Panes"
@@ -43,46 +48,55 @@ name = "Panes"
 keys = ["Alt", "Enter"]
 description = "Split pane horizontally"
 tags = ["daily"]
+probe = { action = "split_horizontal", prefer = "alt" }
 
 [[sections.entries]]
 keys = ["Alt", "Shift", "Enter"]
 description = "Split pane vertically"
 tags = ["daily"]
+probe = { action = "split_vertical", prefer = "alt" }
 
 [[sections.entries]]
 keys = ["prefix", "h / v"]
 description = "Split pane horizontal / vertical"
 tags = []
+probe = { action = "split_horizontal", family = true }
 
 [[sections.entries]]
 keys = ["Ctrl", "Alt", "←/→/↑/↓"]
 description = "Focus pane (no prefix)"
 tags = ["daily"]
+probe = { action = "focus_pane_left", family = true }
 
 [[sections.entries]]
 keys = ["Ctrl", "Alt", "Shift", "←/→/↑/↓"]
 description = "Resize pane (no prefix)"
 tags = ["daily"]
+probe = { action = "resize_pane_left", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "x"]
 description = "Close pane (also Alt-Esc)"
 tags = ["daily"]
+probe = { action = "close_pane", prefer = "prefix" }
 
 [[sections.entries]]
 keys = ["prefix", "z"]
 description = "Zoom pane"
 tags = ["daily"]
+probe = { action = "zoom" }
 
 [[sections.entries]]
 keys = ["prefix", ";"]
 description = "Last pane"
 tags = []
+probe = { action = "last_pane" }
 
 [[sections.entries]]
 keys = ["prefix", "Shift", "O"]
 description = "Rename pane"
 tags = ["rare"]
+probe = { action = "rename_pane" }
 
 [[sections]]
 name = "Tabs"
@@ -91,31 +105,37 @@ name = "Tabs"
 keys = ["prefix", "c"]
 description = "New tab"
 tags = ["daily"]
+probe = { action = "new_tab" }
 
 [[sections.entries]]
 keys = ["prefix", "1..9"]
 description = "Switch to tab by number (also Alt-1..9)"
 tags = ["daily"]
+probe = { action = "switch_tab", prefer = "prefix" }
 
 [[sections.entries]]
 keys = ["prefix", "p / n"]
 description = "Previous / next tab (also Alt-←/→)"
 tags = ["daily"]
+probe = { action = "previous_tab", family = true }
 
 [[sections.entries]]
 keys = ["Alt", "Shift", "←/→"]
 description = "Move tab left / right"
 tags = []
+probe = { action = "move_tab_previous", family = true }
 
 [[sections.entries]]
 keys = ["prefix", "r"]
 description = "Rename tab"
 tags = []
+probe = { action = "rename_tab" }
 
 [[sections.entries]]
 keys = ["prefix", "k"]
 description = "Close tab"
 tags = []
+probe = { action = "close_tab" }
 
 [[sections]]
 name = "Workspaces"
@@ -124,18 +144,22 @@ name = "Workspaces"
 keys = ["prefix", "Shift", "C"]
 description = "New workspace"
 tags = []
+probe = { action = "new_workspace" }
 
 [[sections.entries]]
 keys = ["prefix", "Shift", "R"]
 description = "Rename workspace"
 tags = ["rare"]
+probe = { action = "rename_workspace" }
 
 [[sections.entries]]
 keys = ["prefix", "Shift", "K"]
 description = "Close workspace"
 tags = []
+probe = { action = "close_workspace" }
 
 [[sections.entries]]
 keys = ["prefix", "Shift", "P / N"]
 description = "Previous / next workspace (also Alt-↑/↓)"
 tags = []
+probe = { action = "previous_workspace", family = true }

@@ -53,6 +53,8 @@ pub struct ScoredSection {
     pub name: String,
     /// Sheet this section belongs to (merge key of the parent).
     pub sheet: String,
+    /// Display title of the parent sheet, for grouping headers.
+    pub sheet_title: String,
     /// Matched entries, best score first.
     pub entries: Vec<ScoredEntry>,
 }
@@ -87,6 +89,7 @@ pub fn filter(sheets: &[Sheet], query: &str) -> Vec<ScoredSection> {
                 out.push(ScoredSection {
                     name: section.name.clone(),
                     sheet: sheet.name.clone(),
+                    sheet_title: sheet.display_title().to_string(),
                     entries,
                 });
             }
@@ -136,6 +139,7 @@ mod tests {
                         keys: vec!["Alt".into(), "Enter".into()],
                         description: "split pane vertically".into(),
                         tags: vec![],
+                        probe: None,
                     }],
                 },
                 crate::sheet::Section {
@@ -144,6 +148,7 @@ mod tests {
                         keys: vec!["d".into()],
                         description: "detach session".into(),
                         tags: vec![],
+                        probe: None,
                     }],
                 },
             ],

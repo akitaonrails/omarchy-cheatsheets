@@ -41,6 +41,31 @@ pub struct Entry {
     /// Free-form labels ("daily", "rare", ...) reserved for relevancy sorting.
     #[serde(default)]
     pub tags: Vec<String>,
+    /// How to verify/resolve this entry against the user's live config.
+    /// Entries without a probe are shown as-is (stock, non-configurable tools).
+    #[serde(default)]
+    pub probe: Option<Probe>,
+}
+
+/// Live-config probe for one curated entry.
+#[derive(Debug, Clone, PartialEq, Default, Deserialize)]
+pub struct Probe {
+    /// Substring matched against the resolved binding's command (tmux).
+    #[serde(default)]
+    pub command: Option<String>,
+    /// tmux key table: "prefix", "root", "copy-mode-vi".
+    #[serde(default)]
+    pub table: Option<String>,
+    /// herdr `[keys]` action name.
+    #[serde(default)]
+    pub action: Option<String>,
+    /// Prefer the alternate binding containing this substring.
+    #[serde(default)]
+    pub prefer: Option<String>,
+    /// Family entries (e.g. "arrows resize panes") keep their curated keys
+    /// when at least one binding matches, instead of rewriting them.
+    #[serde(default)]
+    pub family: bool,
 }
 
 impl Sheet {

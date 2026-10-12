@@ -13,6 +13,7 @@ use core::pin::Pin;
 use cxx_qt_lib::{QList, QMap, QMapPair_QString_QVariant, QString, QStringList, QVariant};
 
 use crate::load;
+use crate::resolve;
 use crate::search;
 use crate::sheet::Sheet;
 
@@ -92,13 +93,16 @@ pub struct CheatsheetBridgeRust {
 
 impl Default for CheatsheetBridgeRust {
     fn default() -> Self {
-        let sheets = match load::load_all(&load::default_overlay_dir()) {
+        let mut sheets = match load::load_all(&load::default_overlay_dir()) {
             Ok(sheets) => sheets,
             Err(err) => {
                 tracing::warn!("failed to load overlays, using embedded sheets: {err}");
                 load::load_all(std::path::Path::new("/nonexistent")).unwrap_or_default()
             }
         };
+        let config_home = load::default_config_home();
+        load::apply_dynamic_prefixes(&mut sheets, &config_home);
+        resolve::apply_resolved_bindings(&mut sheets, &config_home);
         let sheets = load::filter_available(sheets, load::command_available);
         Self {
             search_text: QString::default(),
@@ -140,6 +144,13 @@ impl qobject::CheatsheetBridge {
 
         let mut rows = QList::<QVariant>::default();
         for section in search::filter(sheets, &query) {
+            // Scoped view groups by section; the all-sheets view prefixes the
+            // app title so every row is attributable ("tmux · Panes").
+            let group = if self.current_sheet < 0 {
+                format!("{} · {}", section.sheet_title, section.name)
+            } else {
+                section.name.clone()
+            };
             for scored in section.entries {
                 let keys: QStringList = scored.entry.keys.iter().map(QString::from).collect();
                 let mut row = QMap::<QMapPair_QString_QVariant>::default();
@@ -150,6 +161,10 @@ impl qobject::CheatsheetBridge {
                 row.insert(
                     QString::from("section"),
                     QVariant::from(&QString::from(&section.name)),
+                );
+                row.insert(
+                    QString::from("group"),
+                    QVariant::from(&QString::from(&group)),
                 );
                 row.insert(QString::from("keys"), QVariant::from(&keys));
                 row.insert(

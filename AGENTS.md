@@ -31,6 +31,9 @@ cargo deny check
 - `main.rs` is a shim: parse args, call library functions, render/exit.
 - Errors: thiserror enums in the library (`sheet.rs`), anyhow only at the binary boundary.
 - Keep QML thin: all filtering/search logic lives in Rust (`search.rs`), QML renders.
+- **Sheets show real bindings, not static defaults.** New apps must resolve
+  the user's live config (`src/resolve.rs` probe) or document why the tool's
+  keys can't change (see CONTRIBUTING.md "Rule zero").
 
 ## Testing
 

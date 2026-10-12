@@ -1,5 +1,5 @@
 name = "nvim"
-title = "Neovim (LazyVim, leader: Space)"
+title = "Neovim (LazyVim, leader: {prefix})"
 icon = "\ue795"
 command = "nvim"
 
