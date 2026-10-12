@@ -3,19 +3,25 @@
 
 use crate::sheet::{Entry, Sheet};
 
-/// Score `text` against `query`: `Some(score)` when every query char appears
-/// in order (case-insensitive), `None` otherwise. Higher is better.
+/// Score `text` against `query`: `Some(score)` when every whitespace-separated
+/// query word appears as an in-order subsequence (case-insensitive), in any
+/// word order, `None` otherwise. Higher is better.
 ///
-/// Scoring rewards consecutive runs and word/key-boundary hits so that e.g.
-/// "sp" prefers "split pane" over "swap pane". Kept deliberately simple —
-/// the corpus is hundreds of entries, not millions.
+/// Words are matched independently because people search by recall
+/// ("pane split"), not by the curated wording ("Split pane"). Scoring rewards
+/// consecutive runs and word/key-boundary hits so that e.g. "sp" prefers
+/// "split pane" over "swap pane". Kept deliberately simple — the corpus is
+/// hundreds of entries, not millions.
 pub fn score(query: &str, text: &str) -> Option<u32> {
-    let query: Vec<char> = query.chars().flat_map(char::to_lowercase).collect();
-    if query.is_empty() {
-        return Some(0);
-    }
     let text: Vec<char> = text.chars().flat_map(char::to_lowercase).collect();
+    query.split_whitespace().try_fold(0u32, |total, token| {
+        Some(total + score_token(token, &text)?)
+    })
+}
 
+/// Subsequence score of one query word against the lowercased `text`.
+fn score_token(token: &str, text: &[char]) -> Option<u32> {
+    let query: Vec<char> = token.chars().flat_map(char::to_lowercase).collect();
     let mut score = 0u32;
     let mut qi = 0;
     let mut prev_matched = false;
@@ -123,6 +129,36 @@ mod tests {
         let good = score("split", "split window").expect("matches");
         let bad = score("split", "swap pane left it").expect("matches");
         assert!(good > bad);
+    }
+
+    #[test]
+    fn tokens_match_in_any_order() {
+        assert!(score("pane split", "Split pane vertically").is_some());
+    }
+
+    #[test]
+    fn every_token_must_match() {
+        assert!(score("split xyz", "split pane").is_none());
+    }
+
+    #[test]
+    fn extra_whitespace_is_ignored() {
+        assert!(score("  split   pane ", "split pane").is_some());
+        assert_eq!(score("   ", "anything"), Some(0));
+    }
+
+    #[test]
+    fn whole_query_subsequence_still_matches() {
+        // Regression: tokenizing must only widen matches, never drop one.
+        for (query, text) in [
+            ("sp", "split pane"),
+            ("CSP", "Ctrl Space prefix"),
+            ("split pane", "split pane"),
+            ("split window", "split window"),
+            ("prefix h", "prefix h Split pane vertically"),
+        ] {
+            assert!(score(query, text).is_some(), "{query:?} vs {text:?}");
+        }
     }
 
     #[test]

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Search matches query words in any order ("pane split" finds "Split pane");
+  every word must still match. Queries that matched before still match.
+
 ## [0.1.1] - 2026-10-12
 
 ### Added
