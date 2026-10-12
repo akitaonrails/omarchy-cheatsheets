@@ -107,6 +107,7 @@ jobs:
             echo 'Install on Arch/Omarchy: `yay -S omarchy-cheatsheets-bin` (AUR) or unpack a tarball above.'
           } > release-notes.md
           gh release create "$GITHUB_REF_NAME" artifacts/* \
+            --repo "${{ github.repository }}" \
             --title "$GITHUB_REF_NAME" \
             --notes-file release-notes.md \
             --latest
