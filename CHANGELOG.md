@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- PageUp and PageDown keyboard scrolling across the bindings list in both the
+  browser and quick-search windows, while keeping focus in the search field.
+
 ## [0.4.0] - 2026-10-12
 
 ### Added
