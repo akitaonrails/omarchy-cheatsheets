@@ -25,8 +25,8 @@ fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    // The QML side picks `--section` up from Qt.application.arguments and
-    // calls select_sheet itself, so nothing to thread through here.
+    // The QML side picks `--section`/`--search` up from
+    // Qt.application.arguments itself, so only the window choice is threaded.
     let mut app = QGuiApplication::new();
     if let Some(mut app) = app.as_mut() {
         app.as_mut()
@@ -37,9 +37,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut engine = QQmlApplicationEngine::new();
     if let Some(engine) = engine.as_mut() {
-        engine.load(&QUrl::from(&QString::from(
-            "qrc:/qt/qml/omarchy/cheatsheets/qml/Main.qml",
-        )));
+        engine.load(&QUrl::from(&QString::from(cli.window().qml_url())));
     }
 
     if let Some(app) = app.as_mut() {
