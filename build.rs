@@ -10,6 +10,6 @@ fn main() {
     )
     .qt_module("Gui")
     .qt_module("Qml")
-    .files(["src/bridge.rs"])
+    .files(["src/bridge.rs", "src/settings_bridge.rs"])
     .build();
 }

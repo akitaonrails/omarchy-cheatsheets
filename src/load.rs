@@ -32,6 +32,9 @@ pub enum LoadError {
 /// Convenient result alias for loading operations.
 pub type LoadResult<T> = Result<T, LoadError>;
 
+/// Appearance settings file; shares the overlay directory but is not a sheet.
+pub const SETTINGS_FILE: &str = "settings.toml";
+
 const EMBEDDED: &[(&str, &str)] = &[
     ("nvim", include_str!("../data/nvim.toml")),
     ("tmux", include_str!("../data/tmux.toml")),
@@ -119,6 +122,7 @@ pub fn load_all(overlay_dir: &Path) -> LoadResult<Vec<Sheet>> {
         .filter_map(std::result::Result::ok)
         .map(|e| e.path())
         .filter(|p| p.extension().is_some_and(|ext| ext == "toml"))
+        .filter(|p| p.file_name().is_none_or(|name| name != SETTINGS_FILE))
         .collect();
     overlays.sort();
 

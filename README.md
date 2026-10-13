@@ -68,6 +68,28 @@ and a floating window rule (`~/.config/hypr/looknfeel.lua`):
 o.window("^(omarchy-cheatsheets)$", { float = true, center = true, size = { 980, 660 } })
 ```
 
+## Appearance
+
+The window follows your active Omarchy theme out of the box. Click the gear
+next to the search field (or press `Ctrl+,`) to open the appearance drawer:
+pick a theme from cards that preview its colors (arrow keys switch live), a
+text font, the font size, and the window opacity — changes apply immediately
+and are saved to `~/.config/omarchy-cheatsheets/settings.toml`. `Ctrl+=` /
+`Ctrl+-` / `Ctrl+0` grow, shrink, and reset the font size.
+
+The file can also be edited by hand; missing keys use the defaults:
+
+```toml
+theme = "omarchy"     # follow the active theme, or a name like "catppuccin-latte"
+font_family = ""      # empty = system default; keycaps keep the Nerd Font
+font_size = 14        # 10–24, the whole layout scales with it
+opacity = 0.96        # 0.5–1.0
+```
+
+Themes are read from `/usr/share/omarchy/themes/*/colors.toml` and
+`~/.config/omarchy/themes/*/colors.toml`. `settings.toml` is a reserved name:
+it is never loaded as a sheet overlay.
+
 ## Customizing sheets
 
 Drop TOML files in `~/.config/omarchy-cheatsheets/`. Same sheet name + same
@@ -103,9 +125,11 @@ cargo deny check
 
 Layout: `src/sheet.rs` (model), `src/load.rs` (embedded + overlay merge,
 availability probe, prefix resolution), `src/resolve.rs` (live binding
-resolution), `src/search.rs` (scoring), `src/bridge.rs` (cxx-qt QObject),
-`qml/Main.qml` + `qml/QuickSearch.qml` (all UI), `data/*.toml` (curated
-sheets), `plugin/` (Omarchy shell bar widget). Rules and gates live in [AGENTS.md](AGENTS.md); adding a
+resolution), `src/search.rs` (scoring), `src/settings.rs` (settings file +
+theme palettes), `src/bridge.rs` / `src/settings_bridge.rs` (cxx-qt
+QObjects), `qml/Main.qml` + `qml/QuickSearch.qml` (all UI), `data/*.toml`
+(curated sheets), `plugin/` (Omarchy shell bar widget). Rules and gates live
+in [AGENTS.md](AGENTS.md); adding a
 new app's sheet is documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Release

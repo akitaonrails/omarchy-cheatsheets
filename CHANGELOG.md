@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `~/.config/omarchy-cheatsheets/settings.toml` stores appearance settings
+  (`theme`, `font_family`, `font_size`, `opacity`); out-of-range values are
+  clamped. The name is reserved: the overlay loader skips it.
+- Palettes come from Omarchy theme `colors.toml` files (stock and
+  `~/.config/omarchy/themes`); missing colors fall back to Tokyo Night.
+- Appearance drawer (gear button or `Ctrl+,`): theme cards previewing each
+  theme's own colors (arrow keys switch live), a font picker that renders
+  each family in itself, a live preview row, a keycap-style size stepper and
+  an opacity slider, all in the app's palette. Changes apply live and are
+  saved to `settings.toml`; the footer shows where. `Ctrl+=` / `Ctrl+-` /
+  `Ctrl+0` change the font size; the whole layout scales with it.
+  The window color is premultiplied, so lowering the opacity shows the
+  desktop through on light themes too instead of washing out to white.
+  The opacity slider has a real hit area (it was laid out 0px tall, so its
+  handle could not be dragged).
+
+### Changed
+
+- The window follows the active Omarchy theme instead of always using Tokyo
+  Night (unchanged look on the stock theme). Esc closes the appearance panel
+  before it closes the app.
+
 - Quick search window (`--search [QUERY]`): one field, one flat list ranked
   across every sheet with the app and section on each row; ↑/↓ to move, Esc
   to close. Opens with the same window class and size as the browser.

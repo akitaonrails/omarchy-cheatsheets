@@ -7,3 +7,4 @@ mod cli;
 mod load_merge;
 mod quick_search;
 mod resolve;
+mod settings;
