@@ -15,7 +15,8 @@ setup. Tools with non-configurable keys (like btop) ship their documented
 defaults; anything else can be adjusted via TOML overlays.
 
 Ships curated sheets for **Neovim (LazyVim)**, **tmux**, **Herdr**,
-**Zellij**, **lazygit**, **lazydocker**, and **btop** — tools not installed
+**Zellij**, **kitty**, **Alacritty**, **Ghostty**, **Hyprland/Omarchy**,
+**lazygit**, **lazydocker**, and **btop** — tools not installed
 on your system are hidden automatically.
 
 ## Install
@@ -61,6 +62,14 @@ o.bind("SUPER + CTRL + ALT + SLASH", "Search cheatsheets", { launch = "omarchy-c
 ```
 
 (SUPER+T is stock Omarchy's float toggle — hence SUPER+ALT+T.)
+
+To replace Omarchy's built-in SUPER+K keybindings menu with this app
+(opens on the Hyprland sheet, resolved live from the compositor):
+
+```bash
+omarchy-cheatsheets --install-bindings   # backs up bindings.lua first
+hyprctl reload
+```
 
 and a floating window rule (`~/.config/hypr/looknfeel.lua`):
 

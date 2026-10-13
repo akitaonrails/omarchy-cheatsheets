@@ -39,6 +39,11 @@ pub fn apply_resolved_bindings(sheets: &mut [Sheet], config_home: &Path) {
                     apply_actions(sheet, &actions);
                 }
             }
+            "hyprland" => {
+                if let Some(binds) = probe_hyprland() {
+                    apply_hyprland(sheet, &binds);
+                }
+            }
             _ => {}
         }
     }
@@ -928,4 +933,129 @@ mod tests {
         let map = overlay_keymap(&defaults, false, &user);
         assert!(!map.contains_key("copy_to_clipboard"));
     }
+}
+
+// --- hyprland ---------------------------------------------------------------
+
+/// One live Hyprland binding from `hyprctl binds -j`.
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+pub struct HyprBind {
+    /// Modifier bitmask (Shift=1, Ctrl=4, Alt=8, Super=64).
+    pub modmask: u64,
+    /// Key name as Hyprland reports it: `K`, `RETURN`, `SLASH`, `code:20`.
+    pub key: String,
+    /// Quattro binds carry human descriptions; empty for raw `bind` lines.
+    #[serde(default)]
+    pub description: String,
+}
+
+/// Parse `hyprctl binds -j` output, skipping mouse bindings.
+pub fn parse_hyprctl_binds(json: &str) -> Vec<HyprBind> {
+    serde_json::from_str::<Vec<HyprBind>>(json)
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|b| !b.key.starts_with("mouse"))
+        .collect()
+}
+
+/// Live Hyprland bindings from the running compositor. The compositor already
+/// merged stock defaults and user Lua, so this is the true effective set.
+fn probe_hyprland() -> Option<Vec<HyprBind>> {
+    let output = Command::new("hyprctl")
+        .args(["binds", "-j"])
+        .output()
+        .ok()?;
+    output
+        .status
+        .success()
+        .then(|| parse_hyprctl_binds(&String::from_utf8_lossy(&output.stdout)))
+}
+
+/// Modifier bitmask to chips, in the order Omarchy writes them.
+fn modmask_chips(modmask: u64) -> Vec<String> {
+    let mut out = Vec::new();
+    if modmask & 64 != 0 {
+        out.push("Super".to_string());
+    }
+    if modmask & 4 != 0 {
+        out.push("Ctrl".to_string());
+    }
+    if modmask & 8 != 0 {
+        out.push("Alt".to_string());
+    }
+    if modmask & 1 != 0 {
+        out.push("Shift".to_string());
+    }
+    out
+}
+
+/// Hyprland key names to chip text.
+fn hypr_key_chip(key: &str) -> String {
+    match key {
+        "RETURN" => "Enter".into(),
+        "SPACE" => "Space".into(),
+        "ESCAPE" => "Esc".into(),
+        "TAB" => "Tab".into(),
+        "BACKSPACE" => "Backspace".into(),
+        "PRINT" => "Print".into(),
+        "SLASH" => "/".into(),
+        "BACKSLASH" => "\\".into(),
+        "COMMA" => ",".into(),
+        "PERIOD" => ".".into(),
+        "MINUS" => "-".into(),
+        "EQUAL" => "=".into(),
+        "BRACKETLEFT" => "[".into(),
+        "BRACKETRIGHT" => "]".into(),
+        "SEMICOLON" => ";".into(),
+        "APOSTROPHE" => "'".into(),
+        "LEFT" => "←".into(),
+        "RIGHT" => "→".into(),
+        "UP" => "↑".into(),
+        "DOWN" => "↓".into(),
+        // evdev codes Quattro uses for punctuation on some layouts
+        "code:20" => "-".into(),
+        "code:21" => "=".into(),
+        "code:34" => "[".into(),
+        "code:35" => "]".into(),
+        "XF86AudioRaiseVolume" => "Vol+".into(),
+        "XF86AudioLowerVolume" => "Vol-".into(),
+        "XF86AudioMute" => "Mute".into(),
+        "XF86AudioMicMute" => "Mic mute".into(),
+        "XF86AudioPlay" => "Play".into(),
+        "XF86AudioPause" => "Pause".into(),
+        "XF86AudioNext" => "Next".into(),
+        "XF86AudioPrev" => "Prev".into(),
+        "XF86MonBrightnessUp" => "Bright+".into(),
+        "XF86MonBrightnessDown" => "Bright-".into(),
+        other => {
+            // Single letters come uppercase already; leave everything else as-is.
+            other.to_string()
+        }
+    }
+}
+
+/// Hyprland entries probe by description substring (Quattro binds carry them).
+fn apply_hyprland(sheet: &mut Sheet, binds: &[HyprBind]) {
+    for section in &mut sheet.sections {
+        section.entries.retain_mut(|entry| {
+            let Some(probe) = &entry.probe else {
+                return true;
+            };
+            let Some(want) = probe.command.as_deref() else {
+                return true;
+            };
+            let found = binds
+                .iter()
+                .find(|b| b.description.to_lowercase().contains(&want.to_lowercase()));
+            let Some(found) = found else { return false };
+            if probe.family {
+                return true;
+            }
+            let mut chips = modmask_chips(found.modmask);
+            chips.push(hypr_key_chip(&found.key));
+            entry.keys = chips;
+            true
+        });
+    }
+    sheet.sections.retain(|s| !s.entries.is_empty());
 }

@@ -43,6 +43,7 @@ const EMBEDDED: &[(&str, &str)] = &[
     ("kitty", include_str!("../data/kitty.toml")),
     ("alacritty", include_str!("../data/alacritty.toml")),
     ("ghostty", include_str!("../data/ghostty.toml")),
+    ("hyprland", include_str!("../data/hyprland.toml")),
     ("lazygit", include_str!("../data/lazygit.toml")),
     ("lazydocker", include_str!("../data/lazydocker.toml")),
     ("btop", include_str!("../data/btop.toml")),

@@ -13,9 +13,9 @@ pub const FOLLOW_OMARCHY: &str = "omarchy";
 /// Smallest base font size (logical px).
 pub const FONT_SIZE_MIN: u32 = 10;
 /// Largest base font size (logical px).
-pub const FONT_SIZE_MAX: u32 = 24;
+pub const FONT_SIZE_MAX: u32 = 28;
 /// Base font size the QML layout was designed at.
-pub const FONT_SIZE_DEFAULT: u32 = 14;
+pub const FONT_SIZE_DEFAULT: u32 = 16;
 /// Lowest window opacity; below this the list is unreadable over wallpapers.
 pub const OPACITY_MIN: f64 = 0.5;
 /// Fully opaque window.

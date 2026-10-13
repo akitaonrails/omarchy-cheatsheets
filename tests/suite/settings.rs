@@ -57,7 +57,7 @@ fn defaults_follow_omarchy_and_keep_todays_look() {
     let s = Settings::default();
     assert_eq!(s.theme, settings::FOLLOW_OMARCHY);
     assert_eq!(s.font_family, "");
-    assert_eq!(s.font_size, 14);
+    assert_eq!(s.font_size, 16);
     assert!((s.opacity - 0.96).abs() < f64::EPSILON);
 }
 

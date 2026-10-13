@@ -42,6 +42,7 @@ pub mod qobject {
         #[qproperty(QString, window_color, READ, NOTIFY)]
         #[qproperty(i32, font_size_min, READ, CONSTANT)]
         #[qproperty(i32, font_size_max, READ, CONSTANT)]
+        #[qproperty(i32, font_size_default, READ, CONSTANT)]
         #[qproperty(f64, opacity_min, READ, CONSTANT)]
         type AppSettings = super::AppSettingsRust;
 
@@ -103,6 +104,7 @@ pub struct AppSettingsRust {
     window_color: QString,
     font_size_min: i32,
     font_size_max: i32,
+    font_size_default: i32,
     opacity_min: f64,
     settings: Settings,
     palette: Palette,
@@ -128,6 +130,7 @@ impl Default for AppSettingsRust {
             window_color: QString::default(),
             font_size_min: i32::try_from(settings::FONT_SIZE_MIN).unwrap_or(0),
             font_size_max: i32::try_from(settings::FONT_SIZE_MAX).unwrap_or(i32::MAX),
+            font_size_default: i32::try_from(settings::FONT_SIZE_DEFAULT).unwrap_or(16),
             opacity_min: settings::OPACITY_MIN,
             settings: Settings::default(),
             palette: Palette::builtin(),

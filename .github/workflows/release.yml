@@ -217,8 +217,9 @@ jobs:
 
             git clone "ssh://aur@aur.archlinux.org/${pkgbase}.git" "$repo"
             cp "$pkgbuild" "$repo/PKGBUILD"
+            cp "$workspace/packaging/aur/omarchy-cheatsheets.install" "$repo/omarchy-cheatsheets.install"
             (cd "$repo" && makepkg --printsrcinfo > .SRCINFO)
-            (cd "$repo" && git add PKGBUILD .SRCINFO)
+            (cd "$repo" && git add PKGBUILD .SRCINFO omarchy-cheatsheets.install)
             if (cd "$repo" && git diff --cached --quiet); then
               echo "$pkgbase already up to date"
               return

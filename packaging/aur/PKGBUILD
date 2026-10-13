@@ -17,6 +17,7 @@ license=('GPL-3.0-only')
 depends=('gcc-libs' 'glibc' 'qt6-base' 'qt6-declarative')
 makedepends=('cargo' 'clang' 'cmake')
 conflicts=('omarchy-cheatsheets-bin')
+install=omarchy-cheatsheets.install
 options=('!debug' '!lto')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')

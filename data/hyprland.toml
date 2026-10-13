@@ -1,0 +1,217 @@
+name = "hyprland"
+title = "Hyprland / Omarchy"
+icon = "\uf303"
+command = "hyprctl"
+
+[[sections]]
+name = "Launchers & menus"
+
+[[sections.entries]]
+keys = ["Super", "K"]
+description = "Keybindings menu (this app, after --install-bindings)"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Super", "Space"]
+description = "Omarchy menu"
+tags = ["daily"]
+probe = { command = "Omarchy menu" }
+
+[[sections.entries]]
+keys = ["Super", "Return"]
+description = "Terminal"
+tags = ["daily"]
+probe = { command = "Terminal" }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "Return"]
+description = "Browser"
+tags = ["daily"]
+probe = { command = "Browser" }
+
+[[sections.entries]]
+keys = ["Super", "F"]
+description = "File manager"
+tags = ["daily"]
+probe = { command = "File manager" }
+
+[[sections.entries]]
+keys = ["Super", "Esc"]
+description = "System menu"
+tags = []
+probe = { command = "System menu" }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "N"]
+description = "Editor"
+tags = []
+probe = { command = "Editor" }
+
+[[sections]]
+name = "Windows"
+
+[[sections.entries]]
+keys = ["Super", "W"]
+description = "Close window"
+tags = ["daily"]
+probe = { command = "Close window" }
+
+[[sections.entries]]
+keys = ["Super", "T"]
+description = "Toggle floating / tiling"
+tags = ["daily"]
+probe = { command = "floating/tiling" }
+
+[[sections.entries]]
+keys = ["Super", "M"]
+description = "Maximize window"
+tags = ["daily"]
+probe = { command = "Maximize window" }
+
+[[sections.entries]]
+keys = ["Super", "←/→/↑/↓"]
+description = "Move focus between windows"
+tags = ["daily"]
+probe = { command = "Focus on", family = true }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "←/→/↑/↓"]
+description = "Resize window"
+tags = ["daily"]
+probe = { command = "window width", family = true }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "V"]
+description = "Swap split"
+tags = []
+probe = { command = "Swap split" }
+
+[[sections.entries]]
+keys = ["Super", "J"]
+description = "Toggle window split"
+tags = []
+probe = { command = "window split" }
+
+[[sections.entries]]
+keys = ["Super", "[ / ]"]
+description = "Cycle window backward / forward"
+tags = []
+probe = { command = "Cycle window", family = true }
+
+[[sections.entries]]
+keys = ["Super", "S"]
+description = "Toggle scratchpad"
+tags = []
+probe = { command = "scratchpad" }
+
+[[sections.entries]]
+keys = ["Super", "Backspace"]
+description = "Toggle window transparency"
+tags = ["rare"]
+probe = { command = "transparency" }
+
+[[sections.entries]]
+keys = ["Super", "O"]
+description = "Pop window out (float & pin)"
+tags = ["rare"]
+probe = { command = "Pop window out" }
+
+[[sections.entries]]
+keys = ["Super", "G"]
+description = "Toggle window grouping"
+tags = ["rare"]
+probe = { command = "grouping" }
+
+[[sections]]
+name = "Workspaces"
+
+[[sections.entries]]
+keys = ["Super", "1..0"]
+description = "Switch to workspace 1–10"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Super", "Shift", "1..0"]
+description = "Move window to workspace"
+tags = ["daily"]
+
+[[sections.entries]]
+keys = ["Super", "Tab"]
+description = "Next workspace"
+tags = ["daily"]
+probe = { command = "Next workspace" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "Tab"]
+description = "Focus next / previous monitor"
+tags = []
+probe = { command = "next monitor", family = true }
+
+[[sections]]
+name = "Media & system"
+
+[[sections.entries]]
+keys = ["Vol+", "Vol-"]
+description = "Volume up / down"
+tags = ["daily"]
+probe = { command = "Volume up", family = true }
+
+[[sections.entries]]
+keys = ["Mute", "Mic mute"]
+description = "Mute output / microphone"
+tags = ["daily"]
+probe = { command = "Mute", family = true }
+
+[[sections.entries]]
+keys = ["Play", "Next / Prev"]
+description = "Play-pause / next / previous track"
+tags = []
+probe = { command = "track", family = true }
+
+[[sections.entries]]
+keys = ["Bright+", "Bright-"]
+description = "Brightness up / down (Shift = max/min)"
+tags = []
+probe = { command = "Brightness up", family = true }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "M"]
+description = "Mute microphone (app-level)"
+tags = []
+probe = { command = "Mute microphone" }
+
+[[sections]]
+name = "Capture"
+
+[[sections.entries]]
+keys = ["Print"]
+description = "Screenshot"
+tags = ["daily"]
+probe = { command = "Screenshot" }
+
+[[sections.entries]]
+keys = ["Super", "Print"]
+description = "Color picker"
+tags = []
+probe = { command = "Color picker" }
+
+[[sections]]
+name = "Notifications & misc"
+
+[[sections.entries]]
+keys = ["Super", ","]
+description = "Dismiss last notification (Shift = all)"
+tags = []
+probe = { command = "Dismiss last notification" }
+
+[[sections.entries]]
+keys = ["Super", "/"]
+description = "Monitor scaling up"
+tags = ["rare"]
+probe = { command = "Monitor scaling" }
+
+[[sections.entries]]
+keys = ["Super", "Shift", "Backspace"]
+description = "Toggle window gaps"
+tags = ["rare"]
+probe = { command = "window gaps" }

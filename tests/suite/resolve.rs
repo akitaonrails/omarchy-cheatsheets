@@ -125,3 +125,18 @@ fn ghostty_keybind_clear_and_action_args() {
         ]
     );
 }
+
+#[test]
+fn hyprctl_binds_parse_and_modmask_decodes() {
+    use omarchy_cheatsheets::resolve::parse_hyprctl_binds;
+    let json = r#"[
+      {"modmask": 64, "key": "RETURN", "dispatcher": "__lua", "arg": "1", "description": "Terminal"},
+      {"modmask": 72, "key": "SLASH", "dispatcher": "__lua", "arg": "2", "description": "Monitor scaling up"},
+      {"modmask": 64, "key": "mouse:272", "dispatcher": "__lua", "arg": "3", "description": "Move window"}
+    ]"#;
+    let binds = parse_hyprctl_binds(json);
+    assert_eq!(binds.len(), 2, "mouse bindings are filtered out");
+    assert_eq!(binds[0].modmask, 64);
+    assert_eq!(binds[0].description, "Terminal");
+    assert_eq!(binds[1].key, "SLASH");
+}

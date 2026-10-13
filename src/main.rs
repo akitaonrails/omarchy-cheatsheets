@@ -4,6 +4,7 @@ use anyhow::Context;
 use clap::Parser;
 use cxx_qt_lib::{QGuiApplication, QQmlApplicationEngine, QString, QUrl};
 use omarchy_cheatsheets::cli::Cli;
+use omarchy_cheatsheets::install;
 use omarchy_cheatsheets::load;
 use omarchy_cheatsheets::resolve;
 
@@ -13,6 +14,10 @@ fn main() -> anyhow::Result<()> {
         .init();
 
     let cli = Cli::parse();
+
+    if cli.install_bindings {
+        return install::run().context("installing SUPER+K binding");
+    }
 
     if cli.list_sections {
         let mut sheets =

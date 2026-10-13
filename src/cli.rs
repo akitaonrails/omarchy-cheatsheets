@@ -23,6 +23,11 @@ pub struct Cli {
         conflicts_with_all = ["section", "list_sections"]
     )]
     pub search: Option<String>,
+
+    /// Take over Omarchy's SUPER+K with this app's Hyprland sheet (backs up
+    /// ~/.config/hypr/bindings.lua first), then exit.
+    #[arg(long, conflicts_with_all = ["section", "list_sections", "search"])]
+    pub install_bindings: bool,
 }
 
 /// Which QML window the GUI opens.

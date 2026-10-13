@@ -88,7 +88,7 @@ ApplicationWindow {
     }
     Shortcut {
         sequence: "Ctrl+0"
-        onActivated: appSettings.applyFontSize(window.baseFontSize)
+        onActivated: appSettings.applyFontSize(appSettings.font_size_default)
     }
 
     function refresh() {

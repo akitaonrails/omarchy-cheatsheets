@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Hyprland/Omarchy sheet, resolved live from the running compositor
+  (`hyprctl binds`): user's Lua overrides shown, unbound entries dropped.
+- `--install-bindings`: optional SUPER+K takeover (backs up `bindings.lua`,
+  idempotent, opens the Hyprland sheet) — a drop-in replacement for the stock
+  keybindings menu. AUR packages print the hint on install/upgrade.
+
+### Changed
+
+- Default base font size is now 16 (was 14); the whole layout scales from it.
+  `Ctrl+0` resets to the real default instead of the design base.
+
 ## [0.3.0] - 2026-10-12
 
 ### Added
