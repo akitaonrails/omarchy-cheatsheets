@@ -1,0 +1,160 @@
+name = "kitty"
+title = "kitty (mod: Ctrl+Shift)"
+icon = "\uf1b0"
+command = "kitty"
+
+[[sections]]
+name = "Clipboard"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "c"]
+description = "Copy to clipboard"
+tags = ["daily"]
+probe = { action = "copy_to_clipboard" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "v"]
+description = "Paste from clipboard"
+tags = ["daily"]
+probe = { action = "paste_from_clipboard" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "s"]
+description = "Paste from selection"
+tags = []
+probe = { action = "paste_from_selection" }
+
+[[sections]]
+name = "Scrollback & search"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "↑/↓"]
+description = "Scroll line up / down"
+tags = ["daily"]
+probe = { action = "scroll_line_up", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "PgUp/PgDn"]
+description = "Scroll page up / down"
+tags = ["daily"]
+probe = { action = "scroll_page_up", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Home/End"]
+description = "Scroll to top / bottom"
+tags = []
+probe = { action = "scroll_home", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "h"]
+description = "Show scrollback in pager"
+tags = ["daily"]
+probe = { action = "show_scrollback" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "g"]
+description = "Show last command output"
+tags = []
+probe = { action = "show_last_command_output" }
+
+[[sections]]
+name = "Tabs"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "t"]
+description = "New tab"
+tags = ["daily"]
+probe = { action = "new_tab" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "q"]
+description = "Close tab"
+tags = ["daily"]
+probe = { action = "close_tab" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "←/→"]
+description = "Previous / next tab (also Ctrl-Tab)"
+tags = ["daily"]
+probe = { action = "next_tab", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", ". / ,"]
+description = "Move tab forward / backward"
+tags = []
+probe = { action = "move_tab_forward", family = true }
+
+[[sections]]
+name = "Panes (kitty windows)"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Enter"]
+description = "New pane (split)"
+tags = ["daily"]
+probe = { action = "new_window" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "w"]
+description = "Close pane"
+tags = ["daily"]
+probe = { action = "close_window" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "] / ["]
+description = "Next / previous pane"
+tags = ["daily"]
+probe = { action = "next_window", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "f / b"]
+description = "Move pane forward / backward"
+tags = []
+probe = { action = "move_window", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "l"]
+description = "Cycle pane layouts"
+tags = []
+probe = { action = "next_layout" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "n"]
+description = "New OS window"
+tags = []
+probe = { action = "new_os_window" }
+
+[[sections]]
+name = "Font & window"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "= / -"]
+description = "Increase / decrease font size"
+tags = ["daily"]
+probe = { action = "increase_font_size", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Backspace"]
+description = "Reset font size"
+tags = []
+probe = { action = "reset_font_size" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "F11"]
+description = "Toggle fullscreen"
+tags = []
+probe = { action = "toggle_fullscreen" }
+
+[[sections]]
+name = "Config"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "F2"]
+description = "Edit kitty.conf"
+tags = []
+probe = { action = "edit_config_file" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "F5"]
+description = "Reload kitty.conf"
+tags = []
+probe = { action = "reload_config_file" }

@@ -56,6 +56,24 @@ ApplicationWindow {
         sequence: "Escape"
         onActivated: settingsPanel.opened ? settingsPanel.close() : Qt.quit()
     }
+
+    // Tab walks the sheet list; the search field keeps focus throughout.
+    function cycleSheet(step) {
+        const count = sidebar.count
+        if (count < 2) return
+        const next = (sidebar.currentIndex + step + count) % count
+        sidebar.currentIndex = next
+        bridge.selectSheet(next === 0 ? "" : sidebar.model[next])
+    }
+
+    Shortcut {
+        sequence: "Tab"
+        onActivated: window.cycleSheet(1)
+    }
+    Shortcut {
+        sequence: "Shift+Tab"
+        onActivated: window.cycleSheet(-1)
+    }
     Shortcut {
         sequence: "Ctrl+,"
         onActivated: settingsPanel.opened ? settingsPanel.close() : settingsPanel.open()
@@ -915,7 +933,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             spacing: 18
             Repeater {
-                model: [["type", "to filter"], ["click", "to scope"], ["Ctrl+,", "settings"], ["Esc", "to close"]]
+                model: [["type", "to filter"], ["Tab", "next app"], ["click", "to scope"], ["Ctrl+,", "settings"], ["Esc", "to close"]]
                 delegate: Row {
                     required property var modelData
                     spacing: 6

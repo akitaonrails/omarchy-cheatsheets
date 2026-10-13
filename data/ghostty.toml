@@ -1,0 +1,178 @@
+name = "ghostty"
+title = "Ghostty"
+icon = "\uf6e2"
+command = "ghostty"
+
+[[sections]]
+name = "Clipboard"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "c"]
+description = "Copy to clipboard (also Ctrl-Insert)"
+tags = ["daily"]
+probe = { action = "copy_to_clipboard" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "v"]
+description = "Paste from clipboard"
+tags = ["daily"]
+probe = { action = "paste_from_clipboard" }
+
+[[sections.entries]]
+keys = ["Shift", "Insert"]
+description = "Paste from selection"
+tags = []
+probe = { action = "paste_from_selection" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "a"]
+description = "Select all"
+tags = []
+probe = { action = "select_all" }
+
+[[sections]]
+name = "Scrollback & search"
+
+[[sections.entries]]
+keys = ["Shift", "PgUp/PgDn"]
+description = "Scroll page up / down"
+tags = ["daily"]
+probe = { action = "scroll_page_up", family = true }
+
+[[sections.entries]]
+keys = ["Shift", "Home/End"]
+description = "Scroll to top / bottom"
+tags = []
+probe = { action = "scroll_to_top", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "↑/↓"]
+description = "Jump to previous / next prompt"
+tags = ["daily"]
+probe = { action = "jump_to_prompt", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "f"]
+description = "Search scrollback (Esc ends)"
+tags = ["daily"]
+probe = { action = "start_search" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Alt", "j"]
+description = "Open scrollback in editor"
+tags = []
+probe = { action = "write_screen_file", prefer = "alt" }
+
+[[sections]]
+name = "Tabs"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "t"]
+description = "New tab"
+tags = ["daily"]
+probe = { action = "new_tab" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "w"]
+description = "Close tab/surface"
+tags = ["daily"]
+probe = { action = "close_surface" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Tab"]
+description = "Next / previous tab (Shift for back)"
+tags = ["daily"]
+probe = { action = "next_tab", prefer = "ctrl+tab" }
+
+[[sections.entries]]
+keys = ["Alt", "1..9"]
+description = "Go to tab by number (9 = last)"
+tags = ["daily"]
+probe = { action = "goto_tab", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "PgUp/PgDn"]
+description = "Move tab left / right"
+tags = []
+probe = { action = "move_tab", family = true }
+
+[[sections]]
+name = "Splits"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "o / e"]
+description = "Split right / down"
+tags = ["daily"]
+probe = { action = "new_split", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Super", "[ / ]"]
+description = "Previous / next split"
+tags = ["daily"]
+probe = { action = "goto_split", prefer = "[" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Alt", "←/→/↑/↓"]
+description = "Go to split in direction"
+tags = []
+probe = { action = "goto_split", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Super", "Shift", "←/→/↑/↓"]
+description = "Resize split"
+tags = []
+probe = { action = "resize_split", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Enter"]
+description = "Zoom split (toggle)"
+tags = ["daily"]
+probe = { action = "toggle_split_zoom" }
+
+[[sections]]
+name = "Window & font"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "n"]
+description = "New window"
+tags = []
+probe = { action = "new_window" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Enter"]
+description = "Toggle fullscreen"
+tags = []
+probe = { action = "toggle_fullscreen" }
+
+[[sections.entries]]
+keys = ["Ctrl", "= / -"]
+description = "Increase / decrease font size"
+tags = ["daily"]
+probe = { action = "increase_font_size", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "0"]
+description = "Reset font size"
+tags = []
+probe = { action = "reset_font_size" }
+
+[[sections]]
+name = "Misc"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "p"]
+description = "Command palette"
+tags = ["daily"]
+probe = { action = "toggle_command_palette" }
+
+[[sections.entries]]
+keys = ["Ctrl", ","]
+description = "Open config (Ctrl-Shift-, reloads)"
+tags = []
+probe = { action = "open_config" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "q"]
+description = "Quit ghostty"
+tags = []
+probe = { action = "quit" }

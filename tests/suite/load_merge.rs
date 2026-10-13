@@ -13,6 +13,9 @@ fn embedded_sheets_parse() {
         "tmux",
         "herdr",
         "zellij",
+        "kitty",
+        "alacritty",
+        "ghostty",
         "lazygit",
         "lazydocker",
         "btop",
@@ -113,7 +116,7 @@ fn nvim_leader_override_detected() {
 fn missing_overlay_dir_is_fine() {
     let tmp = tempfile::tempdir().unwrap();
     let sheets = load::load_all(&tmp.path().join("does-not-exist")).unwrap();
-    assert_eq!(sheets.len(), 7, "embedded sheets load without overlays");
+    assert_eq!(sheets.len(), 10, "embedded sheets load without overlays");
 }
 
 #[test]

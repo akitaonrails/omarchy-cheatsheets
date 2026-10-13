@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Sheets for kitty, Alacritty, and Ghostty, resolved live from their config
+  files over upstream defaults: remapped keys show the user's chords, unmapped
+  or `clear_all_shortcuts`-dropped defaults disappear. Hidden when the
+  terminal isn't installed.
+- Tab / Shift+Tab cycles sheets in the browser window; the search field keeps
+  focus.
+
+### Fixed
+
+- `display_chord` treated single-letter keys as tmux modifier shorthand, so
+  kitty's `ctrl+shift+c` rendered as "Ctrl Shift Ctrl". Modifier names now
+  apply only before the final key.
+
 ## [0.2.0] - 2026-10-12
 
 ### Added

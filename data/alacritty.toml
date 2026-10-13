@@ -1,0 +1,83 @@
+name = "alacritty"
+title = "Alacritty"
+icon = "\uf120"
+command = "alacritty"
+
+[[sections]]
+name = "Clipboard"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "c"]
+description = "Copy to clipboard"
+tags = ["daily"]
+probe = { action = "Copy" }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "v"]
+description = "Paste from clipboard"
+tags = ["daily"]
+probe = { action = "Paste" }
+
+[[sections.entries]]
+keys = ["Shift", "Insert"]
+description = "Paste from selection"
+tags = []
+probe = { action = "PasteSelection" }
+
+[[sections]]
+name = "Scrollback & search"
+
+[[sections.entries]]
+keys = ["Shift", "PgUp/PgDn"]
+description = "Scroll page up / down"
+tags = ["daily"]
+probe = { action = "ScrollPageUp", family = true }
+
+[[sections.entries]]
+keys = ["Shift", "Home/End"]
+description = "Scroll to top / bottom"
+tags = []
+probe = { action = "ScrollToTop", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "f / b"]
+description = "Search forward / backward"
+tags = ["daily"]
+probe = { action = "SearchForward", family = true }
+
+[[sections]]
+name = "Vi mode"
+
+[[sections.entries]]
+keys = ["Ctrl", "Shift", "Space"]
+description = "Toggle vi mode (motions, / search, y copy)"
+tags = ["daily"]
+probe = { action = "ToggleViMode" }
+
+[[sections]]
+name = "Font"
+
+[[sections.entries]]
+keys = ["Ctrl", "= / -"]
+description = "Increase / decrease font size"
+tags = ["daily"]
+probe = { action = "IncreaseFontSize", family = true }
+
+[[sections.entries]]
+keys = ["Ctrl", "0"]
+description = "Reset font size"
+tags = []
+probe = { action = "ResetFontSize" }
+
+[[sections]]
+name = "Notes"
+
+[[sections.entries]]
+keys = ["—"]
+description = "No tabs or splits in Alacritty — pair with tmux/Herdr for that"
+tags = []
+
+[[sections.entries]]
+keys = ["—"]
+description = "Config reloads live when alacritty.toml is saved"
+tags = []

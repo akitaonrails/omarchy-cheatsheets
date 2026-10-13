@@ -24,6 +24,21 @@ pub fn apply_resolved_bindings(sheets: &mut [Sheet], config_home: &Path) {
                     apply_herdr(sheet, &actions);
                 }
             }
+            "kitty" => {
+                if let Some(actions) = resolve_kitty_keys(config_home) {
+                    apply_actions(sheet, &actions);
+                }
+            }
+            "alacritty" => {
+                if let Some(actions) = resolve_alacritty_keys(config_home) {
+                    apply_actions(sheet, &actions);
+                }
+            }
+            "ghostty" => {
+                if let Some(actions) = resolve_ghostty_keys(config_home) {
+                    apply_actions(sheet, &actions);
+                }
+            }
             _ => {}
         }
     }
@@ -31,26 +46,44 @@ pub fn apply_resolved_bindings(sheets: &mut [Sheet], config_home: &Path) {
 
 /// tmux/herdr chord notation to display chips: `C-M-Left` / `ctrl+alt+left`
 /// both become `["Ctrl", "Alt", "←"]`.
+/// tmux/herdr/kitty/ghostty chord notation to display chips: `C-M-Left`,
+/// `ctrl+alt+left`, `ctrl+shift+c` → `["Ctrl", "Shift", "c"]`.
+///
+/// Single letters are modifier names only before the final part — tmux writes
+/// `C`/`M`/`S`, but in kitty/ghostty notation the key itself may be `c`, `s`
+/// or `m` (`ctrl+shift+c` must not become "Ctrl Shift Ctrl").
 pub fn display_chord(chord: &str) -> Vec<String> {
-    // tmux separates with '-', herdr with '+'.
-    chord
-        .replace('+', "-")
-        .split('-')
-        .map(|part| match part.to_lowercase().as_str() {
-            "c" | "ctrl" | "control" => "Ctrl".into(),
-            "m" | "alt" | "meta" => "Alt".into(),
-            "s" | "shift" => "Shift".into(),
-            "left" => "←".into(),
-            "right" => "→".into(),
-            "up" => "↑".into(),
-            "down" => "↓".into(),
-            "enter" | "return" => "Enter".into(),
-            "space" => "Space".into(),
-            "tab" => "Tab".into(),
-            "esc" | "escape" => "Esc".into(),
-            "backspace" | "bspace" => "Backspace".into(),
-            "delete" => "Delete".into(),
-            _ => part.to_string(),
+    // tmux separates with '-', herdr/kitty/ghostty with '+'.
+    let binding = chord.replace('+', "-");
+    let parts: Vec<&str> = binding.split('-').collect();
+    let last = parts.len() - 1;
+    parts
+        .iter()
+        .enumerate()
+        .map(|(i, part)| {
+            let is_modifier_position = i < last;
+            match part.to_lowercase().as_str() {
+                "c" | "ctrl" | "control" if is_modifier_position => "Ctrl".into(),
+                "m" | "alt" | "meta" if is_modifier_position => "Alt".into(),
+                "s" | "shift" if is_modifier_position => "Shift".into(),
+                "left" | "arrow_left" => "←".into(),
+                "right" | "arrow_right" => "→".into(),
+                "up" | "arrow_up" => "↑".into(),
+                "down" | "arrow_down" => "↓".into(),
+                "enter" | "return" => "Enter".into(),
+                "space" => "Space".into(),
+                "tab" => "Tab".into(),
+                "esc" | "escape" => "Esc".into(),
+                "backspace" | "bspace" => "Backspace".into(),
+                "delete" => "Delete".into(),
+                "insert" => "Insert".into(),
+                "home" => "Home".into(),
+                "end" => "End".into(),
+                "pageup" | "page_up" => "PgUp".into(),
+                "pagedown" | "page_down" => "PgDn".into(),
+                "super" | "cmd" | "command" => "Super".into(),
+                _ => part.to_string(),
+            }
         })
         .collect()
 }
@@ -261,6 +294,12 @@ fn resolve_herdr_keys(config_home: &Path) -> Option<HashMap<String, Vec<String>>
 }
 
 fn apply_herdr(sheet: &mut Sheet, actions: &HashMap<String, Vec<String>>) {
+    apply_actions(sheet, actions);
+}
+
+/// Rewrite/drop probed entries from an action → chords map (herdr, kitty,
+/// alacritty, ghostty all reduce to this shape).
+fn apply_actions(sheet: &mut Sheet, actions: &HashMap<String, Vec<String>>) {
     for section in &mut sheet.sections {
         section.entries.retain_mut(|entry| {
             let Some(probe) = &entry.probe else {
@@ -399,6 +438,328 @@ fn read_lua_sources(dir: &Path) -> Option<String> {
     (!out.is_empty()).then_some(out)
 }
 
+// --- terminal emulators (kitty / alacritty / ghostty) ----------------------
+//
+// All three keep defaults outside the config file, so resolution is:
+// embedded defaults for the curated actions, overlaid with the user's config
+// (later lines win per key; explicit no-op/unmap/clear drops bindings).
+
+/// Default chord for each curated action, in kitty's config notation.
+const KITTY_DEFAULTS: &[(&str, &str)] = &[
+    ("kitty_mod+c", "copy_to_clipboard"),
+    ("kitty_mod+v", "paste_from_clipboard"),
+    ("kitty_mod+s", "paste_from_selection"),
+    ("shift+insert", "paste_from_selection"),
+    ("kitty_mod+up", "scroll_line_up"),
+    ("kitty_mod+down", "scroll_line_down"),
+    ("kitty_mod+page_up", "scroll_page_up"),
+    ("kitty_mod+page_down", "scroll_page_down"),
+    ("kitty_mod+home", "scroll_home"),
+    ("kitty_mod+end", "scroll_end"),
+    ("kitty_mod+h", "show_scrollback"),
+    ("kitty_mod+g", "show_last_command_output"),
+    ("kitty_mod+enter", "new_window"),
+    ("kitty_mod+w", "close_window"),
+    ("kitty_mod+]", "next_window"),
+    ("kitty_mod+[", "previous_window"),
+    ("kitty_mod+f", "move_window"),
+    ("kitty_mod+b", "move_window"),
+    ("kitty_mod+n", "new_os_window"),
+    ("kitty_mod+l", "next_layout"),
+    ("kitty_mod+t", "new_tab"),
+    ("kitty_mod+q", "close_tab"),
+    ("kitty_mod+right", "next_tab"),
+    ("kitty_mod+left", "previous_tab"),
+    ("ctrl+tab", "next_tab"),
+    ("ctrl+shift+tab", "previous_tab"),
+    ("kitty_mod+period", "move_tab_forward"),
+    ("kitty_mod+comma", "move_tab_backward"),
+    ("kitty_mod+equal", "increase_font_size"),
+    ("kitty_mod+minus", "decrease_font_size"),
+    ("kitty_mod+backspace", "reset_font_size"),
+    ("kitty_mod+f11", "toggle_fullscreen"),
+    ("kitty_mod+f10", "toggle_maximized"),
+    ("kitty_mod+f2", "edit_config_file"),
+    ("kitty_mod+f5", "reload_config_file"),
+];
+
+/// Alacritty defaults (Linux), converted from `mods: "Control|Shift"` to our
+/// chord notation. Action names match bindings.rs.
+const ALACRITTY_DEFAULTS: &[(&str, &str)] = &[
+    ("ctrl+shift+c", "Copy"),
+    ("ctrl+shift+v", "Paste"),
+    ("shift+insert", "PasteSelection"),
+    ("shift+pageup", "ScrollPageUp"),
+    ("shift+pagedown", "ScrollPageDown"),
+    ("shift+home", "ScrollToTop"),
+    ("shift+end", "ScrollToBottom"),
+    ("ctrl+shift+f", "SearchForward"),
+    ("ctrl+shift+b", "SearchBackward"),
+    ("ctrl+shift+space", "ToggleViMode"),
+    ("ctrl+equal", "IncreaseFontSize"),
+    ("ctrl+minus", "DecreaseFontSize"),
+    ("ctrl+0", "ResetFontSize"),
+];
+
+/// Ghostty defaults (Linux), from Keybinds.init() in src/config/Config.zig.
+const GHOSTTY_DEFAULTS: &[(&str, &str)] = &[
+    ("ctrl+shift+c", "copy_to_clipboard"),
+    ("ctrl+insert", "copy_to_clipboard"),
+    ("ctrl+shift+v", "paste_from_clipboard"),
+    ("shift+insert", "paste_from_selection"),
+    ("shift+home", "scroll_to_top"),
+    ("shift+end", "scroll_to_bottom"),
+    ("shift+pageup", "scroll_page_up"),
+    ("shift+pagedown", "scroll_page_down"),
+    ("ctrl+shift+arrow_up", "jump_to_prompt"),
+    ("ctrl+shift+arrow_down", "jump_to_prompt"),
+    ("ctrl+shift+f", "start_search"),
+    ("escape", "end_search"),
+    ("ctrl+shift+t", "new_tab"),
+    ("ctrl+shift+w", "close_surface"),
+    ("ctrl+tab", "next_tab"),
+    ("ctrl+shift+tab", "previous_tab"),
+    ("ctrl+shift+arrow_right", "next_tab"),
+    ("ctrl+shift+arrow_left", "previous_tab"),
+    ("ctrl+shift+page_up", "move_tab"),
+    ("ctrl+shift+page_down", "move_tab"),
+    ("alt+1", "goto_tab"),
+    ("alt+2", "goto_tab"),
+    ("alt+3", "goto_tab"),
+    ("alt+4", "goto_tab"),
+    ("alt+5", "goto_tab"),
+    ("alt+6", "goto_tab"),
+    ("alt+7", "goto_tab"),
+    ("alt+8", "goto_tab"),
+    ("alt+9", "last_tab"),
+    ("ctrl+shift+n", "new_window"),
+    ("alt+f4", "close_window"),
+    ("ctrl+shift+q", "quit"),
+    ("ctrl+shift+o", "new_split"),
+    ("ctrl+shift+e", "new_split"),
+    ("ctrl+super+[", "goto_split"),
+    ("ctrl+super+]", "goto_split"),
+    ("ctrl+alt+arrow_up", "goto_split"),
+    ("ctrl+alt+arrow_down", "goto_split"),
+    ("ctrl+alt+arrow_left", "goto_split"),
+    ("ctrl+alt+arrow_right", "goto_split"),
+    ("ctrl+super+shift+arrow_up", "resize_split"),
+    ("ctrl+super+shift+arrow_down", "resize_split"),
+    ("ctrl+super+shift+arrow_left", "resize_split"),
+    ("ctrl+super+shift+arrow_right", "resize_split"),
+    ("ctrl+shift+enter", "toggle_split_zoom"),
+    ("ctrl+equal", "increase_font_size"),
+    ("ctrl+minus", "decrease_font_size"),
+    ("ctrl+0", "reset_font_size"),
+    ("ctrl+enter", "toggle_fullscreen"),
+    ("ctrl+shift+p", "toggle_command_palette"),
+    ("ctrl+shift+comma", "reload_config"),
+    ("ctrl+comma", "open_config"),
+    ("ctrl+shift+a", "select_all"),
+    ("ctrl+shift+alt+j", "write_screen_file"),
+    ("ctrl+shift+j", "write_screen_file"),
+];
+
+/// Parse kitty's config: `map <chord> <action> [args]` and `unmap <chord>`.
+/// Returns (cleared, ordered (chord, action) pairs).
+pub fn parse_kitty_conf(source: &str) -> (bool, Vec<(String, String)>) {
+    let mut cleared = false;
+    let mut out = Vec::new();
+    for line in source.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        if line.starts_with("clear_all_shortcuts") {
+            cleared = line.ends_with("yes") || line.ends_with("true");
+            continue;
+        }
+        if let Some(rest) = line.strip_prefix("unmap ") {
+            if let Some(chord) = rest.split_whitespace().next() {
+                out.push((chord.to_string(), "no_op".to_string()));
+            }
+            continue;
+        }
+        if let Some(rest) = line.strip_prefix("map ") {
+            let mut tokens = rest.split_whitespace();
+            let (Some(chord), Some(action)) = (tokens.next(), tokens.next()) else {
+                continue;
+            };
+            out.push((chord.to_string(), action.to_string()));
+        }
+    }
+    (cleared, out)
+}
+
+/// kitty's `kitty_mod` setting, defaulting to ctrl+shift.
+fn kitty_mod(source: &str) -> String {
+    let mut found = "ctrl+shift".to_string();
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("kitty_mod ")
+            && let Some(m) = rest.split_whitespace().next()
+        {
+            found = m.to_string();
+        }
+    }
+    found
+}
+
+/// Parse alacritty's TOML `[[keyboard.bindings]]`; only normal-mode entries.
+/// Returns ordered (chord, action) pairs; action `None` unbinds.
+pub fn parse_alacritty_conf(source: &str) -> Vec<(String, String)> {
+    let Ok(doc) = toml::from_str::<toml::Value>(source) else {
+        return Vec::new();
+    };
+    let Some(bindings) = doc
+        .get("keyboard")
+        .and_then(|k| k.get("bindings"))
+        .and_then(toml::Value::as_array)
+    else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for binding in bindings {
+        // Modal bindings (Vi/Search) are excluded — the sheet covers normal mode.
+        if binding.get("mode").is_some() {
+            continue;
+        }
+        let (Some(key), Some(action)) = (
+            binding.get("key").and_then(toml::Value::as_str),
+            binding.get("action").and_then(toml::Value::as_str),
+        ) else {
+            continue;
+        };
+        let mods = binding
+            .get("mods")
+            .and_then(toml::Value::as_str)
+            .unwrap_or_default();
+        let mut parts: Vec<String> = mods
+            .split('|')
+            .filter(|m| !m.is_empty())
+            .map(|m| {
+                // alacritty writes "Control"; our notation uses "ctrl"
+                match m.to_lowercase().as_str() {
+                    "control" => "ctrl".to_string(),
+                    other => other.to_string(),
+                }
+            })
+            .collect();
+        let key = if key.len() == 1 {
+            key.to_lowercase()
+        } else {
+            key.to_string()
+        };
+        parts.push(key);
+        out.push((parts.join("+"), action.to_string()));
+    }
+    out
+}
+
+/// Parse ghostty's config: `keybind = trigger=action[:args]` and
+/// `keybind = clear`. Returns (cleared, ordered (chord, action) pairs);
+/// action args (`goto_tab:2`) are trimmed to the action name.
+pub fn parse_ghostty_conf(source: &str) -> (bool, Vec<(String, String)>) {
+    let mut cleared = false;
+    let mut out = Vec::new();
+    for line in source.lines() {
+        let line = line.split('#').next().unwrap_or("").trim();
+        let Some(rest) = line.strip_prefix("keybind") else {
+            continue;
+        };
+        let Some(rest) = rest.trim().strip_prefix('=').map(str::trim) else {
+            continue;
+        };
+        if rest == "clear" {
+            cleared = true;
+            continue;
+        }
+        let Some((trigger, action)) = rest.split_once('=') else {
+            continue;
+        };
+        let action = action.split(':').next().unwrap_or(action).trim();
+        out.push((trigger.trim().to_string(), action.to_string()));
+    }
+    (cleared, out)
+}
+
+/// Overlay ordered (chord, action) pairs on the defaults: the last owner of a
+/// chord wins; `no_op`/`None` unbind. Returns action → chords, defaults first
+/// (deterministic order so the curated default chord leads each entry).
+fn overlay_keymap(
+    defaults: &[(&str, &str)],
+    cleared: bool,
+    user: &[(String, String)],
+) -> HashMap<String, Vec<String>> {
+    let mut by_key: HashMap<String, &str> = HashMap::new();
+    if !cleared {
+        for (chord, action) in defaults {
+            by_key.insert(chord.to_string(), action);
+        }
+    }
+    for (chord, action) in user {
+        by_key.insert(chord.clone(), action);
+    }
+
+    let mut actions: HashMap<String, Vec<String>> = HashMap::new();
+    let mut collect = |chord: &str, action: &str, by_key: &HashMap<String, &str>| {
+        if matches!(action, "no_op" | "None") {
+            return;
+        }
+        // A chord lands under its final owner only.
+        if by_key.get(chord) == Some(&action) {
+            actions
+                .entry(action.to_string())
+                .or_default()
+                .push(chord.to_string());
+        }
+    };
+    if !cleared {
+        for (chord, action) in defaults {
+            collect(chord, action, &by_key);
+        }
+    }
+    for (chord, action) in user {
+        collect(chord, action, &by_key);
+    }
+    actions
+}
+
+fn resolve_kitty_keys(config_home: &Path) -> Option<HashMap<String, Vec<String>>> {
+    let source = fs::read_to_string(config_home.join("kitty/kitty.conf")).unwrap_or_default();
+    let modifier = kitty_mod(&source);
+    let (cleared, user) = parse_kitty_conf(&source);
+    let user: Vec<(String, String)> = user
+        .into_iter()
+        .map(|(chord, action)| (chord.replace("kitty_mod", &modifier), action))
+        .collect();
+    let defaults: Vec<(String, String)> = KITTY_DEFAULTS
+        .iter()
+        .map(|(c, a)| (c.replace("kitty_mod", &modifier), a.to_string()))
+        .collect();
+    Some(overlay_keymap(
+        &defaults
+            .iter()
+            .map(|(c, a)| (c.as_str(), a.as_str()))
+            .collect::<Vec<_>>(),
+        cleared,
+        &user,
+    ))
+}
+
+fn resolve_alacritty_keys(config_home: &Path) -> Option<HashMap<String, Vec<String>>> {
+    let source =
+        fs::read_to_string(config_home.join("alacritty/alacritty.toml")).unwrap_or_default();
+    let user = parse_alacritty_conf(&source);
+    Some(overlay_keymap(ALACRITTY_DEFAULTS, false, &user))
+}
+
+fn resolve_ghostty_keys(config_home: &Path) -> Option<HashMap<String, Vec<String>>> {
+    let source = fs::read_to_string(config_home.join("ghostty/config")).unwrap_or_default();
+    let (cleared, user) = parse_ghostty_conf(&source);
+    Some(overlay_keymap(GHOSTTY_DEFAULTS, cleared, &user))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -528,5 +889,43 @@ mod tests {
         apply_herdr(&mut sheet, &actions);
         assert_eq!(sheet.sections[0].entries.len(), 1);
         assert_eq!(sheet.sections[0].entries[0].keys, ["Alt", "Enter"]);
+    }
+
+    #[test]
+    fn overlay_default_chord_leads_and_stolen_keys_move() {
+        let defaults = [
+            ("kitty_mod+v", "paste_from_clipboard"),
+            ("shift+insert", "paste_from_selection"),
+        ];
+        let user = vec![(
+            "shift+insert".to_string(),
+            "paste_from_clipboard".to_string(),
+        )];
+        let map = overlay_keymap(&defaults, false, &user);
+        assert_eq!(
+            map["paste_from_clipboard"],
+            ["kitty_mod+v", "shift+insert"],
+            "default chord leads, user's chord follows"
+        );
+        assert!(
+            !map.contains_key("paste_from_selection"),
+            "stolen action loses its only chord and drops out"
+        );
+    }
+
+    #[test]
+    fn overlay_clear_all_drops_defaults() {
+        let defaults = [("kitty_mod+c", "copy_to_clipboard")];
+        let user = vec![("ctrl+alt+c".to_string(), "copy_to_clipboard".to_string())];
+        let map = overlay_keymap(&defaults, true, &user);
+        assert_eq!(map["copy_to_clipboard"], ["ctrl+alt+c"]);
+    }
+
+    #[test]
+    fn overlay_no_op_unbinds() {
+        let defaults = [("kitty_mod+c", "copy_to_clipboard")];
+        let user = vec![("kitty_mod+c".to_string(), "no_op".to_string())];
+        let map = overlay_keymap(&defaults, false, &user);
+        assert!(!map.contains_key("copy_to_clipboard"));
     }
 }
