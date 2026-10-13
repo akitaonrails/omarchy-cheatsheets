@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "akitaonrails.cheatsheets",
   "name": "Cheatsheets",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "AkitaOnRails",
   "description": "Pretty, searchable cheatsheets for Neovim, tmux, Herdr and more — showing the real bindings on your machine, not static defaults.",
   "kinds": [
