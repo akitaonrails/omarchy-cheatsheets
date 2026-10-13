@@ -15,7 +15,10 @@ use cxx_qt_lib::{QList, QMap, QMapPair_QString_QVariant, QString, QStringList, Q
 use crate::load;
 use crate::resolve;
 use crate::search;
-use crate::sheet::Sheet;
+use crate::sheet::{Entry, Sheet};
+
+/// Hit cap when QML passes a non-positive limit to `rankedRows`.
+const DEFAULT_RANK_LIMIT: usize = 50;
 
 /// The QObject exposed to QML.
 #[cxx_qt::bridge]
@@ -65,6 +68,13 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "filteredRows"]
         fn filtered_rows(self: &CheatsheetBridge) -> QList_QVariant;
+
+        /// Up to `limit` best hits for the query across every sheet, ignoring
+        /// the sheet selection; maps add `sheetTitle` and `icon` to the
+        /// `filteredRows` fields. Non-positive `limit` uses a default.
+        #[qinvokable]
+        #[cxx_name = "rankedRows"]
+        fn ranked_rows(self: &CheatsheetBridge, limit: i32) -> QList_QVariant;
 
         /// Select a sheet by name; unknown or empty selects "all".
         #[qinvokable]
@@ -152,27 +162,28 @@ impl qobject::CheatsheetBridge {
                 section.name.clone()
             };
             for scored in section.entries {
-                let keys: QStringList = scored.entry.keys.iter().map(QString::from).collect();
-                let mut row = QMap::<QMapPair_QString_QVariant>::default();
-                row.insert(
-                    QString::from("sheet"),
-                    QVariant::from(&QString::from(&section.sheet)),
-                );
-                row.insert(
-                    QString::from("section"),
-                    QVariant::from(&QString::from(&section.name)),
-                );
-                row.insert(
-                    QString::from("group"),
-                    QVariant::from(&QString::from(&group)),
-                );
-                row.insert(QString::from("keys"), QVariant::from(&keys));
-                row.insert(
-                    QString::from("description"),
-                    QVariant::from(&QString::from(&scored.entry.description)),
-                );
+                let mut row = entry_row(&section.sheet, &section.name, &scored.entry);
+                insert_str(&mut row, "group", &group);
                 rows.append(QVariant::from(&row));
             }
+        }
+        rows
+    }
+
+    /// Flat ranked hits across every sheet as QVariantMaps.
+    pub fn ranked_rows(&self, limit: i32) -> QList<QVariant> {
+        let limit = usize::try_from(limit)
+            .ok()
+            .filter(|&n| n > 0)
+            .unwrap_or(DEFAULT_RANK_LIMIT);
+        let query = self.search_text.to_string();
+
+        let mut rows = QList::<QVariant>::default();
+        for hit in search::rank(&self.sheets, &query, limit) {
+            let mut row = entry_row(&hit.sheet, &hit.section, &hit.entry);
+            insert_str(&mut row, "sheetTitle", &hit.sheet_title);
+            insert_str(&mut row, "icon", hit.icon.as_deref().unwrap_or("\u{f02d}"));
+            rows.append(QVariant::from(&row));
         }
         rows
     }
@@ -187,4 +198,19 @@ impl qobject::CheatsheetBridge {
             .map_or(-1, |i| i32::try_from(i).unwrap_or(-1));
         self.set_current_sheet(index);
     }
+}
+
+/// Fields every row carries: `sheet`, `section`, `keys`, `description`.
+fn entry_row(sheet: &str, section: &str, entry: &Entry) -> QMap<QMapPair_QString_QVariant> {
+    let keys: QStringList = entry.keys.iter().map(QString::from).collect();
+    let mut row = QMap::<QMapPair_QString_QVariant>::default();
+    insert_str(&mut row, "sheet", sheet);
+    insert_str(&mut row, "section", section);
+    row.insert(QString::from("keys"), QVariant::from(&keys));
+    insert_str(&mut row, "description", &entry.description);
+    row
+}
+
+fn insert_str(row: &mut QMap<QMapPair_QString_QVariant>, key: &str, value: &str) {
+    row.insert(QString::from(key), QVariant::from(&QString::from(value)));
 }
