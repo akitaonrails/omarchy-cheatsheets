@@ -74,6 +74,34 @@ ApplicationWindow {
         sequence: "Shift+Tab"
         onActivated: window.cycleSheet(-1)
     }
+
+    NumberAnimation {
+        id: scrollAnim
+        target: entryList
+        property: "contentY"
+        duration: 120
+        easing.type: Easing.OutCubic
+    }
+
+    function scrollEntries(step) {
+        if (entryList.contentHeight <= entryList.height) return
+        const pageSize = entryList.height * 0.8
+        const maxScroll = Math.max(0, entryList.contentHeight - entryList.height)
+        const target = Math.max(0, Math.min(maxScroll, entryList.contentY + step * pageSize))
+        scrollAnim.stop()
+        scrollAnim.to = target
+        scrollAnim.start()
+    }
+
+    Shortcut {
+        sequence: "PageDown"
+        onActivated: window.scrollEntries(1)
+    }
+    Shortcut {
+        sequence: "PageUp"
+        onActivated: window.scrollEntries(-1)
+    }
+
     Shortcut {
         sequence: "Ctrl+,"
         onActivated: settingsPanel.opened ? settingsPanel.close() : settingsPanel.open()
@@ -686,6 +714,16 @@ ApplicationWindow {
                         clip: true
                         verticalAlignment: TextInput.AlignVCenter
                         onTextChanged: bridge.search_text = text
+                        Keys.onPressed: function(event) {
+                            if (event.key === Qt.Key_PageDown) {
+                                window.scrollEntries(1)
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_PageUp) {
+                                window.scrollEntries(-1)
+                                event.accepted = true
+                            }
+                        }
+
 
                         Text {
                             anchors.fill: parent
@@ -933,7 +971,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             spacing: 18
             Repeater {
-                model: [["type", "to filter"], ["Tab", "next app"], ["click", "to scope"], ["Ctrl+,", "settings"], ["Esc", "to close"]]
+                model: [["type", "to filter"], ["Tab", "next app"], ["PgUp/PgDn", "scroll"], ["click", "to scope"], ["Ctrl+,", "settings"], ["Esc", "to close"]]
                 delegate: Row {
                     required property var modelData
                     spacing: 6

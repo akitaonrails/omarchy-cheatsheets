@@ -39,6 +39,15 @@ ApplicationWindow {
         sequence: "Escape"
         onActivated: Qt.quit()
     }
+    Shortcut {
+        sequence: "PageDown"
+        onActivated: window.moveSelection(Math.max(1, Math.floor(hitList.height / 46)))
+    }
+    Shortcut {
+        sequence: "PageUp"
+        onActivated: window.moveSelection(-Math.max(1, Math.floor(hitList.height / 46)))
+    }
+
 
     function refresh() {
         hitList.model = bridge.rankedRows(window.hitLimit)
@@ -110,6 +119,16 @@ ApplicationWindow {
                     onTextChanged: bridge.search_text = text
                     Keys.onUpPressed: window.moveSelection(-1)
                     Keys.onDownPressed: window.moveSelection(1)
+                    Keys.onPressed: function(event) {
+                        if (event.key === Qt.Key_PageUp) {
+                            window.moveSelection(-Math.max(1, Math.floor(hitList.height / 46)))
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_PageDown) {
+                            window.moveSelection(Math.max(1, Math.floor(hitList.height / 46)))
+                            event.accepted = true
+                        }
+                    }
+
 
                     Text {
                         anchors.fill: parent
@@ -278,7 +297,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             spacing: 18
             Repeater {
-                model: [["type", "to search"], ["↑ ↓", "to move"], ["Esc", "to close"]]
+                model: [["type", "to search"], ["↑ ↓", "to move"], ["PgUp/PgDn", "page"], ["Esc", "to close"]]
                 delegate: Row {
                     required property var modelData
                     spacing: 6
