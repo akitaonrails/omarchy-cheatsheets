@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Nix flake (`packages.default`, `devShells.default`) so the app builds and
+  runs on NixOS.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added

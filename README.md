@@ -42,6 +42,14 @@ omarchy plugin remove akitaonrails.cheatsheets   # bar widget, if added
 yay -R omarchy-cheatsheets-bin                   # or omarchy-cheatsheets
 ```
 
+On NixOS (or anywhere with Nix), the repo is a flake:
+
+```bash
+nix run github:akitaonrails/omarchy-cheatsheets
+```
+
+or add it as a flake input and install `packages.${system}.default`.
+
 ## Usage
 
 ```bash
