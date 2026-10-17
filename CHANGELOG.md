@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   runs on NixOS.
 - `OMARCHY_CHEATSHEETS_NO_BUILTIN=1` skips the embedded sheets, so only the
   overlays in `~/.config/omarchy-cheatsheets/` load.
+- Without an active Omarchy theme, the palette comes from
+  `~/.config/omarchy-cheatsheets/colors.toml` when present.
 
 ## [0.5.0] - 2026-10-14
 

@@ -104,7 +104,9 @@ opacity = 0.96        # 0.5–1.0
 ```
 
 Themes are read from `/usr/share/omarchy/themes/*/colors.toml` and
-`~/.config/omarchy/themes/*/colors.toml`. `settings.toml` is a reserved name:
+`~/.config/omarchy/themes/*/colors.toml`. Without an active Omarchy theme,
+"follow" reads `~/.config/omarchy-cheatsheets/colors.toml` (same keys), so a
+plain Hyprland setup can theme the window too. `settings.toml` is a reserved name:
 it is never loaded as a sheet overlay.
 
 ## Customizing sheets

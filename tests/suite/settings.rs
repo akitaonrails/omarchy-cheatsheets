@@ -311,6 +311,23 @@ fn follow_omarchy_reads_the_current_theme() {
 }
 
 #[test]
+fn active_theme_falls_back_to_the_overlay_dir_without_omarchy() {
+    let omarchy = tempfile::tempdir().unwrap();
+    let overlay = tempfile::tempdir().unwrap();
+    let current = omarchy.path().join("current/theme");
+    assert_eq!(
+        settings::active_theme_dir(&current, overlay.path()),
+        overlay.path()
+    );
+
+    write_theme(omarchy.path(), "current/theme", LATTE);
+    assert_eq!(
+        settings::active_theme_dir(&current, overlay.path()),
+        current
+    );
+}
+
+#[test]
 fn named_theme_prefers_the_user_root() {
     let user = tempfile::tempdir().unwrap();
     let system = tempfile::tempdir().unwrap();

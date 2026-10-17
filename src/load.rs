@@ -35,6 +35,10 @@ pub type LoadResult<T> = Result<T, LoadError>;
 /// Appearance settings file; shares the overlay directory but is not a sheet.
 pub const SETTINGS_FILE: &str = "settings.toml";
 
+/// Theme palette for setups without Omarchy; shares the overlay directory but
+/// is not a sheet.
+pub const COLORS_FILE: &str = "colors.toml";
+
 const EMBEDDED: &[(&str, &str)] = &[
     ("nvim", include_str!("../data/nvim.toml")),
     ("tmux", include_str!("../data/tmux.toml")),
@@ -143,7 +147,10 @@ pub fn load_with(overlay_dir: &Path, builtin: bool) -> LoadResult<Vec<Sheet>> {
         .filter_map(std::result::Result::ok)
         .map(|e| e.path())
         .filter(|p| p.extension().is_some_and(|ext| ext == "toml"))
-        .filter(|p| p.file_name().is_none_or(|name| name != SETTINGS_FILE))
+        .filter(|p| {
+            p.file_name()
+                .is_none_or(|name| name != SETTINGS_FILE && name != COLORS_FILE)
+        })
         .collect();
     overlays.sort();
 

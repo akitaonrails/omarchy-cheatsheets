@@ -244,3 +244,19 @@ fn settings_file_is_not_an_overlay() {
     let embedded = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
     assert_eq!(with_settings, embedded);
 }
+
+#[test]
+fn colors_file_is_not_an_overlay() {
+    // colors.toml themes the window when Omarchy is absent; like settings.toml
+    // it lives next to the overlays without being a sheet.
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join(load::COLORS_FILE),
+        "background = \"#282c34\"\n",
+    )
+    .unwrap();
+
+    let with_colors = load::load_all(dir.path()).unwrap();
+    let embedded = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
+    assert_eq!(with_colors, embedded);
+}

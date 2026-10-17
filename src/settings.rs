@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::load;
+use crate::load::{self, COLORS_FILE};
 
 /// `theme` value that follows the active Omarchy theme.
 pub const FOLLOW_OMARCHY: &str = "omarchy";
@@ -22,9 +22,6 @@ pub const OPACITY_MIN: f64 = 0.5;
 pub const OPACITY_MAX: f64 = 1.0;
 /// Slight translucency so Hyprland's blur bleeds through.
 pub const OPACITY_DEFAULT: f64 = 0.96;
-
-/// Palette file every Omarchy theme directory ships.
-const COLORS_FILE: &str = "colors.toml";
 
 /// Errors while reading or writing the settings file.
 #[derive(Debug, Error)]
@@ -277,12 +274,26 @@ impl ThemeRoots {
                 PathBuf::from,
             );
         Self {
-            current: state_home.join("omarchy/current/theme"),
+            current: active_theme_dir(
+                &state_home.join("omarchy/current/theme"),
+                &load::default_overlay_dir(),
+            ),
             dirs: vec![
                 load::default_config_home().join("omarchy/themes"),
                 PathBuf::from("/usr/share/omarchy/themes"),
             ],
         }
+    }
+}
+
+/// The active Omarchy theme when there is one, else the overlay directory, so
+/// a `colors.toml` dropped next to the overlay sheets themes the window on a
+/// Hyprland setup without Omarchy.
+pub fn active_theme_dir(omarchy_current: &Path, overlay_dir: &Path) -> PathBuf {
+    if omarchy_current.join(COLORS_FILE).is_file() {
+        omarchy_current.to_path_buf()
+    } else {
+        overlay_dir.to_path_buf()
     }
 }
 
