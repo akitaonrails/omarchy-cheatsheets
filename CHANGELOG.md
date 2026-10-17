@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   overlays in `~/.config/omarchy-cheatsheets/` load.
 - Without an active Omarchy theme, the palette comes from
   `~/.config/omarchy-cheatsheets/colors.toml` when present.
+- Translatable window text (`src/i18n.rs`), with Brazilian Portuguese.
 
 ## [0.5.0] - 2026-10-14
 

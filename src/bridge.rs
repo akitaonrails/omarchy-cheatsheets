@@ -12,6 +12,7 @@ use core::pin::Pin;
 
 use cxx_qt_lib::{QList, QMap, QMapPair_QString_QVariant, QString, QStringList, QVariant};
 
+use crate::i18n;
 use crate::load;
 use crate::resolve;
 use crate::search;
@@ -80,6 +81,10 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "selectSheet"]
         fn select_sheet(self: Pin<&mut CheatsheetBridge>, name: &QString);
+
+        /// `text` translated for the user's locale (see `i18n.rs`).
+        #[qinvokable]
+        fn tr(self: &CheatsheetBridge, text: &QString) -> QString;
     }
 
     impl cxx_qt::Constructor<()> for CheatsheetBridge {}
@@ -99,6 +104,8 @@ pub struct CheatsheetBridgeRust {
     /// Index into `sheets`; -1 means "all sheets".
     current_sheet: i32,
     sheets: Vec<Sheet>,
+    /// UI language, read once at startup.
+    locale: String,
 }
 
 impl Default for CheatsheetBridgeRust {
@@ -118,6 +125,7 @@ impl Default for CheatsheetBridgeRust {
             search_text: QString::default(),
             current_sheet: -1,
             sheets,
+            locale: i18n::locale(),
         }
     }
 }
@@ -197,6 +205,11 @@ impl qobject::CheatsheetBridge {
             .position(|s| s.name == name)
             .map_or(-1, |i| i32::try_from(i).unwrap_or(-1));
         self.set_current_sheet(index);
+    }
+
+    /// `text` translated for the user's locale.
+    pub fn tr(&self, text: &QString) -> QString {
+        QString::from(&i18n::translate(&self.locale, &text.to_string()))
     }
 }
 

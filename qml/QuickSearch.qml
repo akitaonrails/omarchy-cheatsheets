@@ -133,7 +133,7 @@ ApplicationWindow {
                     Text {
                         anchors.fill: parent
                         visible: !searchInput.text
-                        text: "Search bindings across all apps…"
+                        text: bridge.tr("Search bindings across all apps…")
                         color: window.dim
                         font.pixelSize: 18
                         verticalAlignment: Text.AlignVCenter
@@ -284,8 +284,8 @@ ApplicationWindow {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: searchInput.text.trim().length > 0
-                        ? "No bindings match — try fewer words"
-                        : "Type what it does, its section or app — e.g. \"split pane\", \"copy mode\", \"tmux quit\""
+                        ? bridge.tr("No bindings match — try fewer words")
+                        : bridge.tr("Type what it does, its section or app — e.g. \"split pane\", \"copy mode\", \"tmux quit\"")
                     color: window.dim
                     font.pixelSize: 14
                 }
@@ -297,7 +297,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             spacing: 18
             Repeater {
-                model: [["type", "to search"], ["↑ ↓", "to move"], ["PgUp/PgDn", "page"], ["Esc", "to close"]]
+                model: [[bridge.tr("type"), bridge.tr("to search")], ["↑ ↓", bridge.tr("to move")], ["PgUp/PgDn", bridge.tr("page")], ["Esc", bridge.tr("to close")]]
                 delegate: Row {
                     required property var modelData
                     spacing: 6

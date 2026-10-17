@@ -137,7 +137,7 @@ ApplicationWindow {
         }
         sidebar.icons = ["\uf02d"].concat(listFromQStringList(bridge.sheetIcons()))
         sidebar.model = ["All"].concat(listFromQStringList(bridge.sheetNames()))
-        sidebar.titles = ["All sheets"].concat(listFromQStringList(bridge.sheetTitles()))
+        sidebar.titles = [bridge.tr("All sheets")].concat(listFromQStringList(bridge.sheetTitles()))
         sidebar.currentIndex = bridge.current_sheet + 1
         refresh()
         searchInput.forceActiveFocus()
@@ -270,7 +270,7 @@ ApplicationWindow {
                 }
                 Text {
                     Layout.fillWidth: true
-                    text: "Appearance"
+                    text: bridge.tr("Appearance")
                     color: window.fgBright
                     font.pixelSize: window.px(18)
                     font.family: window.textFont
@@ -318,7 +318,7 @@ ApplicationWindow {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Grep in project"
+                        text: bridge.tr("Grep in project")
                         color: window.fg
                         font.pixelSize: window.px(14)
                         font.family: window.textFont
@@ -334,7 +334,7 @@ ApplicationWindow {
                 Layout.leftMargin: 22
                 Layout.rightMargin: 22
                 spacing: 8
-                SectionLabel { text: "Text" }
+                SectionLabel { text: bridge.tr("Text") }
 
                 ComboBox {
                     id: fontBox
@@ -342,7 +342,7 @@ ApplicationWindow {
                     implicitHeight: window.px(36)
                     textRole: "text"
                     valueRole: "value"
-                    model: [{ value: "", text: "System default" }].concat(
+                    model: [{ value: "", text: bridge.tr("System default") }].concat(
                         Qt.fontFamilies().map(family => ({ value: family, text: family })))
                     currentIndex: Math.max(0, indexOfValue(appSettings.font_family))
                     onActivated: appSettings.applyFontFamily(currentValue)
@@ -416,7 +416,7 @@ ApplicationWindow {
                     spacing: 8
                     Text {
                         Layout.fillWidth: true
-                        text: "Size"
+                        text: bridge.tr("Size")
                         color: window.fg
                         font.pixelSize: window.px(13)
                         font.family: window.textFont
@@ -449,12 +449,12 @@ ApplicationWindow {
                 Layout.leftMargin: 22
                 Layout.rightMargin: 22
                 spacing: 4
-                SectionLabel { text: "Window" }
+                SectionLabel { text: bridge.tr("Window") }
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
                     Text {
-                        text: "Opacity"
+                        text: bridge.tr("Opacity")
                         color: window.fg
                         font.pixelSize: window.px(13)
                         font.family: window.textFont
@@ -512,7 +512,7 @@ ApplicationWindow {
             SectionLabel {
                 Layout.leftMargin: 22
                 Layout.topMargin: 4
-                text: "Theme"
+                text: bridge.tr("Theme")
             }
             GridView {
                 id: themeGrid
@@ -621,7 +621,7 @@ ApplicationWindow {
                 spacing: 10
                 Text {
                     Layout.fillWidth: true
-                    text: "Saved to " + appSettings.settingsPath()
+                    text: bridge.tr("Saved to ") + appSettings.settingsPath()
                     color: window.dim
                     font.pixelSize: window.px(10)
                     font.family: window.textFont
@@ -645,7 +645,7 @@ ApplicationWindow {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
-                            text: "Reset"
+                            text: bridge.tr("Reset")
                             color: window.fg
                             font.pixelSize: window.px(12)
                             font.family: window.textFont
@@ -675,7 +675,7 @@ ApplicationWindow {
             spacing: 16
 
             Text {
-                text: "Cheatsheets"
+                text: bridge.tr("Cheatsheets")
                 color: window.fgBright
                 font.pixelSize: window.px(20)
                 font.family: window.textFont
@@ -729,7 +729,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             anchors.verticalCenter: parent.verticalCenter
                             visible: !searchInput.text
-                            text: "Type to filter bindings…"
+                            text: bridge.tr("Type to filter bindings…")
                             color: window.dim
                             font.pixelSize: window.px(15)
                             font.family: window.textFont
@@ -957,7 +957,7 @@ ApplicationWindow {
                         color: window.muted
                     }
                     Text {
-                        text: "No bindings match — try a shorter query"
+                        text: bridge.tr("No bindings match — try a shorter query")
                         color: window.dim
                         font.pixelSize: window.px(14)
                         font.family: window.textFont
@@ -971,7 +971,7 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
             spacing: 18
             Repeater {
-                model: [["type", "to filter"], ["Tab", "next app"], ["PgUp/PgDn", "scroll"], ["click", "to scope"], ["Ctrl+,", "settings"], ["Esc", "to close"]]
+                model: [[bridge.tr("type"), bridge.tr("to filter")], ["Tab", bridge.tr("next app")], ["PgUp/PgDn", bridge.tr("scroll")], [bridge.tr("click"), bridge.tr("to scope")], ["Ctrl+,", bridge.tr("settings")], ["Esc", bridge.tr("to close")]]
                 delegate: Row {
                     required property var modelData
                     spacing: 6

@@ -4,6 +4,7 @@
 // declared here instead of living as a top-level tests/*.rs target.
 
 mod cli;
+mod i18n;
 mod install;
 mod load_merge;
 mod quick_search;

@@ -2,6 +2,7 @@
 
 pub mod bridge;
 pub mod cli;
+pub mod i18n;
 pub mod install;
 pub mod load;
 pub mod resolve;

@@ -109,6 +109,12 @@ Themes are read from `/usr/share/omarchy/themes/*/colors.toml` and
 plain Hyprland setup can theme the window too. `settings.toml` is a reserved name:
 it is never loaded as a sheet overlay.
 
+## Language
+
+The window text follows the locale (`LC_ALL`, `LC_MESSAGES`, `LANG`).
+Brazilian Portuguese ships today; other languages are a table in
+`src/i18n.rs` away. Sheet content stays as written in the TOML.
+
 ## Customizing sheets
 
 Drop TOML files in `~/.config/omarchy-cheatsheets/`. Same sheet name + same
