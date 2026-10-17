@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nix flake (`packages.default`, `devShells.default`) so the app builds and
   runs on NixOS.
+- `OMARCHY_CHEATSHEETS_NO_BUILTIN=1` skips the embedded sheets, so only the
+  overlays in `~/.config/omarchy-cheatsheets/` load.
 
 ## [0.5.0] - 2026-10-14
 

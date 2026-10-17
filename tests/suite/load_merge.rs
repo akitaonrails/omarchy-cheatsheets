@@ -120,6 +120,32 @@ fn missing_overlay_dir_is_fine() {
 }
 
 #[test]
+fn without_builtin_only_overlays_load() {
+    let tmp = tempfile::tempdir().unwrap();
+    std::fs::write(
+        tmp.path().join("mine.toml"),
+        r##"
+name = "mytool"
+[[sections]]
+name = "General"
+[[sections.entries]]
+keys = ["q"]
+description = "Quit"
+"##,
+    )
+    .unwrap();
+
+    let sheets = load::load_with(tmp.path(), false).unwrap();
+    let names: Vec<_> = sheets.iter().map(|s| s.name.as_str()).collect();
+    assert_eq!(names, ["mytool"]);
+    assert!(
+        load::load_with(&tmp.path().join("missing"), false)
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
 fn overlay_replaces_entry_with_same_keys() {
     let tmp = tempfile::tempdir().unwrap();
     std::fs::write(

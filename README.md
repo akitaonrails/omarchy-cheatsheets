@@ -127,6 +127,10 @@ description = "Close pane"
 tags = ["daily"]      # optional, free-form
 ```
 
+Setups that generate every sheet themselves (for example a NixOS config
+writing them from its own keybinding definitions) can drop the embedded ones
+with `OMARCHY_CHEATSHEETS_NO_BUILTIN=1`; only the overlays load then.
+
 ## Development
 
 Requirements: Rust 1.95 (pinned in `rust-toolchain.toml`), Qt6

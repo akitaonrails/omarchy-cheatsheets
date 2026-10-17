@@ -108,13 +108,30 @@ pub fn default_config_home() -> PathBuf {
         .map_or_else(|| PathBuf::from("."), Path::to_path_buf)
 }
 
-/// Load the embedded sheets with overlays from `overlay_dir` merged on top.
+/// Environment variable that skips the embedded sheets when set to anything
+/// but empty or `0`, for setups that ship every sheet as an overlay (e.g. a
+/// NixOS config generating them from its own keybinding definitions).
+pub const NO_BUILTIN_ENV: &str = "OMARCHY_CHEATSHEETS_NO_BUILTIN";
+
+/// Whether the embedded sheets load, per [`NO_BUILTIN_ENV`].
+pub fn builtin_enabled() -> bool {
+    std::env::var(NO_BUILTIN_ENV).map_or(true, |v| v.is_empty() || v == "0")
+}
+
+/// Load the embedded sheets (unless [`NO_BUILTIN_ENV`] opts out) with
+/// overlays from `overlay_dir` merged on top.
+pub fn load_all(overlay_dir: &Path) -> LoadResult<Vec<Sheet>> {
+    load_with(overlay_dir, builtin_enabled())
+}
+
+/// [`load_all`] with the embedded sheets switched on or off explicitly.
 ///
 /// A missing or unreadable overlay directory is not an error — embedded
 /// sheets always work. A malformed overlay *file* is an error: silent
 /// fallback would hide typos the user meant to apply.
-pub fn load_all(overlay_dir: &Path) -> LoadResult<Vec<Sheet>> {
-    let mut sheets = EMBEDDED
+pub fn load_with(overlay_dir: &Path, builtin: bool) -> LoadResult<Vec<Sheet>> {
+    let embedded: &[(&str, &str)] = if builtin { EMBEDDED } else { &[] };
+    let mut sheets = embedded
         .iter()
         .map(|(name, source)| parse_sheet(source, &format!("embedded:{name}.toml")))
         .collect::<LoadResult<Vec<_>>>()?;
