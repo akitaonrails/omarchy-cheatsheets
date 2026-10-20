@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `~/.config/omarchy-cheatsheets/colors.toml` when present.
 - Translatable window text (`src/i18n.rs`), with Brazilian Portuguese.
 
+### Changed
+
+- Dependency refresh: `toml` 0.8 → 1.1 (upstream's new parser; no parsing
+  behavior change for sheets, settings, or live-config resolution) and newer
+  transitive crates; dropped the unused `rstest` dev-dependency, slimming the
+  dev build graph.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added
