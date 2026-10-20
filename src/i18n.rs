@@ -56,15 +56,24 @@ pub fn locale() -> String {
         .unwrap_or_default()
 }
 
-/// `text` translated for `locale`, or `text` itself when there is no translation.
-pub fn translate(locale: &str, text: &str) -> String {
-    let table = match locale.split('_').next() {
+/// Table covering `locale`'s language, or none when the language is unknown.
+fn table(locale: &str) -> &'static [(&'static str, &'static str)] {
+    match locale.split('_').next() {
         Some("pt") => PT_BR,
         _ => &[],
-    };
-    table
+    }
+}
+
+/// `text` translated for `locale`, or `text` itself when there is no translation.
+pub fn translate(locale: &str, text: &str) -> String {
+    table(locale)
         .iter()
         .find(|(english, _)| *english == text)
         .map_or(text, |(_, translated)| translated)
         .to_string()
+}
+
+/// Whether the `locale` table has an entry for `text`; guards the QML mirror.
+pub fn has_translation(locale: &str, text: &str) -> bool {
+    table(locale).iter().any(|(english, _)| *english == text)
 }
