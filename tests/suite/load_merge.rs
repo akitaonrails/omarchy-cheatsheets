@@ -29,6 +29,30 @@ fn embedded_sheets_parse() {
 }
 
 #[test]
+fn embedded_icons_are_nerd_font_v3_glyphs() {
+    let sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
+    for sheet in &sheets {
+        let Some(icon) = sheet.icon.as_deref() else {
+            continue;
+        };
+        let mut chars = icon.chars();
+        let cp = chars.next().expect("icon must not be empty") as u32;
+        assert!(
+            chars.next().is_none(),
+            "{}: icon must be a single glyph",
+            sheet.name
+        );
+        // Nerd Fonts v3 dropped the old Material Design range (U+F500-U+FD46)
+        // and renumbered those icons, so a codepoint in it renders as tofu.
+        assert!(
+            !(0xF500..=0xFD46).contains(&cp),
+            "{}: U+{cp:04X} is from the Material Design range Nerd Fonts v3 removed",
+            sheet.name
+        );
+    }
+}
+
+#[test]
 fn unavailable_commands_are_filtered_out() {
     let sheets = load::load_all(tempfile::tempdir().unwrap().path()).unwrap();
     // Inject a fake PATH probe: everything unavailable except tmux.

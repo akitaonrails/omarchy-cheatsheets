@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ghostty sidebar icon used `U+F6E2`, a codepoint from the old Material Design
   range that Nerd Fonts v3 removed, so it rendered as a stray glyph. Switched to
   `nf-md-ghost` (`U+F02A0`).
+- Embedded sheet icons are checked against the Material Design range Nerd
+  Fonts v3 removed, so a stale v2 codepoint fails the suite instead of
+  rendering as tofu.
 
 ## [0.6.0] - 2026-10-20
 
