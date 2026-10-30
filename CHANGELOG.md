@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Fonts v3 removed, so a stale v2 codepoint fails the suite instead of
   rendering as tofu.
 
+### Changed
+
+- Dependency refresh: `cc` 1.9 → 1.10, `rustix` 1.1.5 → 1.1.6, `smallvec`
+  1.16.3 → 1.16.4, `unicode-width` 0.2.2 → 0.2.3.
+
 ## [0.6.0] - 2026-10-20
 
 ### Added
