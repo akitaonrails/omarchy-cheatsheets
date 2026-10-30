@@ -1,6 +1,6 @@
 name = "ghostty"
 title = "Ghostty"
-icon = "\uf6e2"
+icon = "\U000F02A0"
 command = "ghostty"
 
 [[sections]]

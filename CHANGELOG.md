@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ghostty sidebar icon used `U+F6E2`, a codepoint from the old Material Design
+  range that Nerd Fonts v3 removed, so it rendered as a stray glyph. Switched to
+  `nf-md-ghost` (`U+F02A0`).
+
 ## [0.6.0] - 2026-10-20
 
 ### Added
